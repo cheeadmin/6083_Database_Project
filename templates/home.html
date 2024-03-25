@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+    <style>
+        .container {
+            display: flex;
+            flex-wrap: wrap; /* Allows columns to wrap when space is insufficient */
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .column {
+            flex-basis: 24%; /* Adjust this to change how wide each column should be */
+            margin: 0 10px; /* Spacing between columns */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-sizing: border-box; /* Include padding and border in the element's total width */
+            margin-bottom: 20px; /* Spacing between rows when wrapped */
+        }
+        /* Additional styling */
+        h1 {
+            text-align: center;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome</h1>
+    <div class="container">
+        <div class="column">
+            <h2>RENTAL</h2>
+            <p>Description for rental services...</p>
+            <a href="/rental" class="button">Go to rental</a>
+        </div>
+        <div class="column">
+            <h2>LESSONS BOOKING</h2>
+            <p>Information on booking lessons...</p>
+            <a href="/lessons-booking" class="button">Book lessons</a>
+        </div>
+        <div class="column">
+            <h2>EQUIPMENT MAINTENANCE</h2>
+            <p>Details about equipment maintenance...</p>
+            <a href="/equipment-maintenance" class="button">Maintenance info</a>
+        </div>
+        <!-- New column for PROFILE MANAGEMENT -->
+        <div class="column">
+            <h2>PROFILE MANAGEMENT</h2>
+            <p>Manage your profile details here.</p>
+            <!-- Ensure the URL name in 'href' matches the one defined in your urls.py -->
+            <a href="{% url 'create_customer_profile' %}" class="button">Manage your profile</a>
+        </div>
+    </div>
+</body>
+</html>
