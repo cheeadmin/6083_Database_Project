@@ -68,6 +68,9 @@ TEMPLATES = [
     },
 ]
 
+LOGOUT_REDIRECT_URL = 'index'
+
+
 WSGI_APPLICATION = 'chee_project.wsgi.application'
 
 

@@ -26,7 +26,7 @@ def user_login(request):
 
         if user is not None:
             login(request, user)
-            return redirect('create_customer_profile')  # Redirect to home page after successful login
+            return redirect('home')  # Redirect to home page after successful login
         else:
             return render(request, 'login.html', {'error_message': 'Invalid username or password'})
 

@@ -62,6 +62,10 @@
             <!-- Ensure the URL name in 'href' matches the one defined in your urls.py -->
             <a href="{% url 'user' %}" class="button">Manage your profile</a>
         </div>
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="button">Logout</button>
+        </form>
     </div>
 </body>
 </html>
