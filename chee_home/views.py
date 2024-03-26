@@ -1,11 +1,11 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse, Http404
 from django.db import connection
-from django.http import HttpResponse
 from .database import get_customer_by_id
 from django.contrib.auth.decorators import login_required
+from .models import Customer
 
 # Create your views here.
 
@@ -99,3 +99,55 @@ def create_customer_profile(request):
         return redirect('home')  # Make sure 'home' is a valid URL name in your urls.py
 
     return render(request, 'profile.html')
+
+@login_required
+def read_customer_profiles(request):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, firstName, lastName, contactInfo, paymentDetails FROM Customer WHERE user_id = %s", [request.user.id])
+        profiles = cursor.fetchall()
+        print(profiles)  # Debug: Print the profiles to the console.
+    return render(request, 'read_profiles.html', {'profiles': profiles})
+
+
+@login_required
+def update_customer_profile(request, profile_id):
+    if request.method == 'POST':
+        firstName = request.POST.get('firstName')
+        lastName = request.POST.get('lastName')
+        contactInfo = request.POST.get('contactInfo')
+        paymentDetails = request.POST.get('paymentDetails')
+        
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE Customer SET firstName = %s, lastName = %s, contactInfo = %s, paymentDetails = %s
+                WHERE id = %s AND user_id = %s
+            """, [firstName, lastName, contactInfo, paymentDetails, profile_id, request.user.id])
+        return redirect('read_customer_profiles')
+    
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, firstName, lastName, contactInfo, paymentDetails FROM Customer WHERE id = %s AND user_id = %s", [profile_id, request.user.id])
+        profile = cursor.fetchone()
+        if profile is None:
+            raise Http404('Profile not found.')
+
+    return render(request, 'update_profile.html', {'profile': profile})
+
+@login_required
+def delete_customer_profile(request, profile_id):
+    if request.method == 'POST':
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM Customer WHERE id = %s AND user_id = %s", [profile_id, request.user.id])
+        return redirect('read_customer_profiles')
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, firstName, lastName FROM Customer WHERE id = %s AND user_id = %s", [profile_id, request.user.id])
+        profile = cursor.fetchone()
+        if profile is None:
+            raise Http404('Profile not found.')
+
+    return render(request, 'delete_profile.html', {'profile': profile})
+
+@login_required
+def user_view(request):
+    # Logic to pass necessary context data to the template
+    return render(request, 'user.html')

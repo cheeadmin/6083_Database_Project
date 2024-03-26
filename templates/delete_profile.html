@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Profile</title>
+</head>
+<body>
+    <h1>Delete Profile</h1>
+    <p>Are you sure you want to delete the profile for {{ profile.firstName }} {{ profile.lastName }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirm Delete</button>
+    </form>
+    <a href="{% url 'read_customer_profiles' %}">Cancel</a>
+</body>
+</html>

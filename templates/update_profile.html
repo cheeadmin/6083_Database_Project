@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Profile</title>
+</head>
+<body>
+    <h1>Update Profile</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" value="{{ profile.firstName }}" required><br>
+        
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" value="{{ profile.lastName }}" required><br>
+        
+        <label for="contactInfo">Contact Information:</label>
+        <input type="text" id="contactInfo" name="contactInfo" value="{{ profile.contactInfo }}" required><br>
+        
+        <label for="paymentDetails">Payment Details:</label>
+        <select id="paymentDetails" name="paymentDetails" required>
+            <option value="Cash" {% if profile.paymentDetails == "Cash" %}selected{% endif %}>Cash</option>
+            <option value="Credit Card" {% if profile.paymentDetails == "Credit Card" %}selected{% endif %}>Credit Card</option>
+        </select><br>
+        
+        <button type="submit">Update</button>
+    </form>
+</body>
+</html>

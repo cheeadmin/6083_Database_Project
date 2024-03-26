@@ -3,6 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Complete Your Profile</title>
+    <style>
+        .home-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <h2>Complete Your Profile</h2>
@@ -18,9 +29,13 @@
         <input type="text" id="contactInfo" name="contactInfo" required><br>
         
         <label for="paymentDetails">Payment Details:</label>
-        <input type="text" id="paymentDetails" name="paymentDetails" required><br>
+        <select id="paymentDetails" name="paymentDetails" required>
+            <option value="Cash">Cash</option>
+            <option value="Credit Card">Credit Card</option>
+        </select><br>
         
         <button type="submit">Submit</button>
     </form>
+    <a href="{% url 'home' %}" class="home-link">Back to Home</a>
 </body>
 </html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Read Profiles</title>
+    <style>
+        /* Add your CSS styles here */
+        .home-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        table {
+            width: 100%; /* Adjust table width as needed */
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .action-link {
+            background-color: #dc3545; /* Different color for delete action */
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Profiles</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Firstname</th>
+                <th>Lastname</th>
+                <th>Contact Info</th>
+                <th>Payment Details</th>
+                <th>Update</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profile in profiles %}
+                <tr>
+                    <td>{{ profile.1 }}</td>
+                    <td>{{ profile.2 }}</td>
+                    <td>{{ profile.3 }}</td>
+                    <td>{{ profile.4 }}</td>
+                    <td>
+                        <a href="{% url 'update_customer_profile' profile_id=profile.0 %}">Update</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'delete_customer_profile' profile_id=profile.0 %}" class="action-link">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No profiles found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'home' %}" class="home-link">Back to Home</a>
+</body>
+</html>
