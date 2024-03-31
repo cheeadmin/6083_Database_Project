@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Complete Your Profile</title>
     <style>
-        .home-link {
+        .home-link, .user-link {
             display: inline-block;
             margin-top: 20px;
             padding: 10px 20px;
@@ -25,7 +25,7 @@
         <label for="lastName">Last Name:</label>
         <input type="text" id="lastName" name="lastName" required><br>
         
-        <label for="contactInfo">Contact Information:</label>
+        <label for="contactInfo">Phone Number:</label>
         <input type="text" id="contactInfo" name="contactInfo" required><br>
         
         <label for="paymentDetails">Payment Details:</label>
@@ -36,6 +36,9 @@
         
         <button type="submit">Submit</button>
     </form>
+    <!-- Updated User Profile Button -->
+    <a href="{% url 'user' %}" class="user-link">Back to Profile Management</a><br>
+    <!-- Existing Back to Home Button -->
     <a href="{% url 'home' %}" class="home-link">Back to Home</a>
 </body>
 </html>

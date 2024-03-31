@@ -6,34 +6,55 @@
     <style>
         .container {
             display: flex;
-            flex-wrap: wrap; /* Allows columns to wrap when space is insufficient */
-            justify-content: space-between;
+            flex-wrap: wrap;
+            justify-content: center; /* This will center the items */
             padding: 20px;
         }
         .column {
-            flex-basis: 24%; /* Adjust this to change how wide each column should be */
-            margin: 0 10px; /* Spacing between columns */
+            flex: 0 0 24%; /* Flex-grow is set to 0, flex-shrink is set to 0, and flex-basis is set to 24% */
+            margin: 10px; /* Adjust margin for space around columns */
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 8px;
             background-color: #f9f9f9;
-            box-sizing: border-box; /* Include padding and border in the element's total width */
-            margin-bottom: 20px; /* Spacing between rows when wrapped */
+            box-sizing: border-box;
         }
-        /* Additional styling */
         h1 {
             text-align: center;
         }
+        .column h2 {
+            margin-top: 0;
+        }
+        .column p {
+            margin-top: 0;
+        }
         .button {
             display: block;
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
+            width: auto; /* Auto width for the button */
+            padding: 10px 20px; /* Padding inside the button */
+            margin-top: 20px; /* Space between the paragraph and button */
             text-align: center;
             background-color: #007bff;
             color: white;
             text-decoration: none;
             border-radius: 5px;
+            border: none;
+        }
+        form {
+            flex: 0 0 100%; /* Flex-grow is set to 0, flex-shrink is set to 0, and flex-basis is set to 100% */
+            text-align: center;
+            margin-top: 20px;
+        }
+        form .button {
+            width: initial;
+            display: inline-block;
+            padding: 10px 20px;
+        }
+        /* Ensure that the buttons are not too wide on smaller screens */
+        @media screen and (max-width: 768px) {
+            .column, form {
+                flex-basis: 100%;
+            }
         }
     </style>
 </head>
@@ -55,11 +76,9 @@
             <p>Details about equipment maintenance...</p>
             <a href="/equipment-maintenance" class="button">Maintenance info</a>
         </div>
-        <!-- New column for PROFILE MANAGEMENT -->
         <div class="column">
             <h2>PROFILE MANAGEMENT</h2>
             <p>Manage your profile details here.</p>
-            <!-- Ensure the URL name in 'href' matches the one defined in your urls.py -->
             <a href="{% url 'user' %}" class="button">Manage your profile</a>
         </div>
         <form action="{% url 'logout' %}" method="post">

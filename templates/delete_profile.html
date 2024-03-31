@@ -3,14 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <title>Delete Profile</title>
+    <style>
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff; /* The blue color you want */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .button:hover {
+            background-color: #0056b3; /* A slightly darker blue for hover effect */
+        }
+        
+        .cancel-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff; /* The blue color you want */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        
+        .cancel-link:hover {
+            background-color: #0056b3; /* A slightly darker blue for hover effect */
+        }
+        
+        /* Add any additional styling here */
+    </style>
 </head>
 <body>
     <h1>Delete Profile</h1>
-    <p>Are you sure you want to delete the profile for {{ profile.firstName }} {{ profile.lastName }}?</p>
+    <p>Are you sure you want to delete the profile for {{ profile.1 }}?</p>
     <form method="post">
         {% csrf_token %}
-        <button type="submit">Confirm Delete</button>
+        <button type="submit" class="button">Confirm Delete</button>
     </form>
-    <a href="{% url 'read_customer_profiles' %}">Cancel</a>
+    <a href="{% url 'read_customer_profiles' %}" class="cancel-link">Cancel</a>
 </body>
 </html>

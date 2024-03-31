@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>Read Profiles</title>
     <style>
-        /* Add your CSS styles here */
-        .home-link {
+        /* Styles for home and profile management links */
+        .home-link, .user-link {
             display: inline-block;
             margin-top: 20px;
             padding: 10px 20px;
@@ -15,8 +15,10 @@
             border-radius: 5px;
             text-align: center;
         }
+        
+        /* Styles for table layout and formatting */
         table {
-            width: 100%; /* Adjust table width as needed */
+            width: 100%;
             border-collapse: collapse;
         }
         th, td {
@@ -27,12 +29,22 @@
         th {
             background-color: #f2f2f2;
         }
+
+        /* Styles for action links (update and delete) */
         .action-link {
-            background-color: #dc3545; /* Different color for delete action */
             padding: 5px 10px;
             border-radius: 5px;
             color: white;
             text-decoration: none;
+            text-align: center;
+        }
+
+        .update-action {
+            background-color: #007bff; /* Blue color for update action */
+        }
+
+        .delete-action {
+            background-color: #dc3545; /* Red color for delete action */
         }
     </style>
 </head>
@@ -57,10 +69,10 @@
                     <td>{{ profile.3 }}</td>
                     <td>{{ profile.4 }}</td>
                     <td>
-                        <a href="{% url 'update_customer_profile' profile_id=profile.0 %}">Update</a>
+                        <a href="{% url 'update_customer_profile' profile_id=profile.0 %}" class="action-link update-action">Update</a>
                     </td>
                     <td>
-                        <a href="{% url 'delete_customer_profile' profile_id=profile.0 %}" class="action-link">Delete</a>
+                        <a href="{% url 'delete_customer_profile' profile_id=profile.0 %}" class="action-link delete-action">Delete</a>
                     </td>
                 </tr>
             {% empty %}
@@ -70,6 +82,8 @@
             {% endfor %}
         </tbody>
     </table>
+    <a href="{% url 'create_customer_profile' %}" class="user-link">Add New Profile</a><br>
+    <a href="{% url 'user' %}" class="user-link">Back to Profile Management</a><br>
     <a href="{% url 'home' %}" class="home-link">Back to Home</a>
 </body>
 </html>

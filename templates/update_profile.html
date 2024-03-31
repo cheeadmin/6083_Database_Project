@@ -46,7 +46,7 @@
         <label for="lastName">Last Name:</label>
         <input type="text" id="lastName" name="lastName" value="{{ profile.lastName }}" required><br>
         
-        <label for="contactInfo">Contact Information:</label>
+        <label for="contactInfo">Phone Number:</label>
         <input type="text" id="contactInfo" name="contactInfo" value="{{ profile.contactInfo }}" required><br>
         
         <label for="paymentDetails">Payment Details:</label>
@@ -57,6 +57,7 @@
         
         <button type="submit">Update</button>
     </form>
+    <a href="{% url 'user' %}" class="user-link">Back to Profile Management</a><br>
     <a href="{% url 'home' %}" class="home-link">Back to Home</a>
 </body>
 </html>

@@ -70,6 +70,7 @@ TEMPLATES = [
 
 LOGOUT_REDIRECT_URL = 'index'
 
+LOGIN_URL = 'login'
 
 WSGI_APPLICATION = 'chee_project.wsgi.application'
 

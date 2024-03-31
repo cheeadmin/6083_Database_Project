@@ -1,11 +1,12 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from django.db import connection
 from .database import get_customer_by_id
 from django.contrib.auth.decorators import login_required
 from .models import Customer
+import re
 
 # Create your views here.
 
@@ -83,20 +84,25 @@ def show_customer(request, customer_id):
 @login_required
 def create_customer_profile(request):
     if request.method == 'POST':
-        firstName = request.POST.get('firstName')
-        lastName = request.POST.get('lastName')
-        contactInfo = request.POST.get('contactInfo')
+        firstName = request.POST.get('firstName').strip()
+        lastName = request.POST.get('lastName').strip()
+        contactInfo = request.POST.get('contactInfo').strip()
         paymentDetails = request.POST.get('paymentDetails')
-        user_id = request.user.id  # Assuming you're linking Customer to the User
+        user_id = request.user.id
+
+        # Basic validation
+        if not firstName or not lastName:
+            return HttpResponseBadRequest("First name and last name cannot be empty.")
+        if not re.match(r'^\+?1?\d{9,15}$', contactInfo):  # This is a simple regex for international phone numbers
+            return HttpResponseBadRequest("Invalid phone number format.")
 
         with connection.cursor() as cursor:
-            # Corrected SQL to include user_id and matching column names to your schema
             cursor.execute("""
                 INSERT INTO Customer (firstName, lastName, contactInfo, PaymentDetails, user_id)
                 VALUES (%s, %s, %s, %s, %s)
             """, [firstName, lastName, contactInfo, paymentDetails, user_id])
 
-        return redirect('home')  # Make sure 'home' is a valid URL name in your urls.py
+        return redirect('home')
 
     return render(request, 'profile.html')
 
@@ -117,6 +123,12 @@ def update_customer_profile(request, profile_id):
         contactInfo = request.POST.get('contactInfo')
         paymentDetails = request.POST.get('paymentDetails')
         
+        # Basic validation
+        if not firstName or not lastName:
+            return HttpResponseBadRequest("First name and last name cannot be empty.")
+        if not re.match(r'^\+?1?\d{9,15}$', contactInfo):  # This is a simple regex for international phone numbers
+            return HttpResponseBadRequest("Invalid phone number format.")
+
         with connection.cursor() as cursor:
             cursor.execute("""
                 UPDATE Customer SET firstName = %s, lastName = %s, contactInfo = %s, paymentDetails = %s
