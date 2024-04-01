@@ -19,6 +19,9 @@
         .available {
             color: blue;
         }
+        .pagination {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -30,6 +33,7 @@
             <th>Last Maintenance</th>
             <th>Size</th>
             <th>Availability</th>
+            <th>Action</th>
         </tr>
         {% for snowboard in snowboards %}
         <tr>
@@ -38,8 +42,24 @@
             <td>{{ snowboard.2 }}</td>
             <td>{{ snowboard.3 }}</td>
             <td class="{% if snowboard.4 %}available{% else %}unavailable{% endif %}">{% if snowboard.4 %}Available{% else %}Unavailable{% endif %}</td>
+            <td>
+                <button {% if not snowboard.4 %}disabled{% endif %}>Rent</button>
+                <button>Remove</button>
+            </td>
         </tr>
         {% endfor %}
     </table>
+    <div class="pagination">
+        <!-- Correct the pagination variable names to 'snowboards' -->
+        <span>Page {{ snowboards.number }} of {{ snowboards.paginator.num_pages }}.</span>
+        {% if snowboards.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ snowboards.previous_page_number }}">previous</a>
+        {% endif %}
+        {% if snowboards.has_next %}
+            <a href="?page={{ snowboards.next_page_number }}">next</a>
+            <a href="?page={{ snowboards.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </div>
 </body>
 </html>

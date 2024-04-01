@@ -1,9 +1,13 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.db import connection
 from datetime import datetime
 from .models import Equipment
+from django.core.paginator import Paginator
 
+@login_required
 def equipment_list(request):
     with connection.cursor() as cursor:
         # Adjust the SQL query to match your current table structure.
@@ -16,7 +20,7 @@ def equipment_list(request):
     # Adjust the context variable and template as necessary.
     return render(request, 'equipment_list.html', {'equipments': equipments})
 
-
+@login_required
 def add_to_rental_cart(request, equipment_id):
     if request.method == 'POST':
         rental_date = request.POST.get('rental_date')
@@ -58,14 +62,43 @@ def add_to_rental_cart(request, equipment_id):
                 # Handle the case where the equipment's daily price is not found
                 return render(request, 'error.html', {'error': 'Daily price not found for the selected equipment'})
 
+@login_required
 def list_skis(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT Brand, Description, LastMaintenance, Size, Availability FROM mydb.Equipment WHERE typeID = 1")
-        skis = cursor.fetchall()
+        skis_list = cursor.fetchall()
+
+    paginator = Paginator(skis_list, 20)  # Shows 20 skis per page.
+    page_number = request.GET.get('page')
+    skis = paginator.get_page(page_number)
+
     return render(request, 'list_skis.html', {'skis': skis})
 
+@login_required
 def list_snowboards(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT Brand, Description, LastMaintenance, Size, Availability FROM mydb.Equipment WHERE typeID = 2")
-        snowboards = cursor.fetchall()
+        snowboards_list = cursor.fetchall()
+
+    paginator = Paginator(snowboards_list, 20)  # Shows 20 snowboards per page.
+    page_number = request.GET.get('page')
+    snowboards = paginator.get_page(page_number)
+
     return render(request, 'list_snowboards.html', {'snowboards': snowboards})
+
+@login_required
+def rent_equipment(request, equipment_id):
+    with connection.cursor() as cursor:
+        cursor.execute("UPDATE Equipment SET Availability = FALSE WHERE equipmentID = %s", [equipment_id])
+        cursor.execute("""
+            INSERT INTO Rental (rentalDate, equipmentID, customerId) 
+            VALUES (CURRENT_DATE, %s, %s)
+        """, [equipment_id, request.user.id])
+    return redirect('equipment_list')
+
+@login_required
+def return_equipment(request, equipment_id):
+    with connection.cursor() as cursor:
+        cursor.execute("UPDATE Equipment SET Availability = TRUE WHERE equipmentID = %s", [equipment_id])
+        cursor.execute("UPDATE Rental SET returnDate = CURRENT_DATE WHERE equipmentID = %s AND returnDate IS NULL", [equipment_id])
+    return redirect('equipment_list')
