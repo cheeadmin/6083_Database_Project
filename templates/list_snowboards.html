@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Snowboard Equipment List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .unavailable {
+            color: red;
+        }
+        .available {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Snowboard Equipment List</h1>
+    <table>
+        <tr>
+            <th>Brand</th>
+            <th>Description</th>
+            <th>Last Maintenance</th>
+            <th>Size</th>
+            <th>Availability</th>
+        </tr>
+        {% for snowboard in snowboards %}
+        <tr>
+            <td>{{ snowboard.0 }}</td>
+            <td>{{ snowboard.1 }}</td>
+            <td>{{ snowboard.2 }}</td>
+            <td>{{ snowboard.3 }}</td>
+            <td class="{% if snowboard.4 %}available{% else %}unavailable{% endif %}">{% if snowboard.4 %}Available{% else %}Unavailable{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

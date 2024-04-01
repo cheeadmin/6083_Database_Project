@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ski Equipment List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .unavailable {
+            color: red;
+        }
+        .available {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ski Equipment List</h1>
+    <table>
+        <tr>
+            <th>Brand</th>
+            <th>Description</th>
+            <th>Last Maintenance</th>
+            <th>Size</th>
+            <th>Availability</th>
+        </tr>
+        {% for ski in skis %}
+        <tr>
+            <td>{{ ski.0 }}</td>
+            <td>{{ ski.1 }}</td>
+            <td>{{ ski.2 }}</td>
+            <td>{{ ski.3 }}</td>
+            <td class="{% if ski.4 %}available{% else %}unavailable{% endif %}">{% if ski.4 %}Available{% else %}Unavailable{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -6,18 +6,16 @@ from .models import Equipment
 
 def equipment_list(request):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT equipmentID, Brand, `Condition` FROM mydb.Equipment")
+        # Adjust the SQL query to match your current table structure.
+        cursor.execute("""
+            SELECT equipmentID, Brand, Description, typeID, Availability, 
+                   LastMaintenance, Price, Size 
+            FROM mydb.Equipment
+        """)
         equipments = cursor.fetchall()
-    
-    equipments_list = []
-    for equipment in equipments:
-        equipments_list.append({
-            'equipmentID': equipment[0],
-            'Brand': equipment[1],
-            'Condition': equipment[2]
-        })
+    # Adjust the context variable and template as necessary.
+    return render(request, 'equipment_list.html', {'equipments': equipments})
 
-    return render(request, 'equipment_list.html', {'equipments': equipments_list})
 
 def add_to_rental_cart(request, equipment_id):
     if request.method == 'POST':
@@ -59,3 +57,15 @@ def add_to_rental_cart(request, equipment_id):
             else:
                 # Handle the case where the equipment's daily price is not found
                 return render(request, 'error.html', {'error': 'Daily price not found for the selected equipment'})
+
+def list_skis(request):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT Brand, Description, LastMaintenance, Size, Availability FROM mydb.Equipment WHERE typeID = 1")
+        skis = cursor.fetchall()
+    return render(request, 'list_skis.html', {'skis': skis})
+
+def list_snowboards(request):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT Brand, Description, LastMaintenance, Size, Availability FROM mydb.Equipment WHERE typeID = 2")
+        snowboards = cursor.fetchall()
+    return render(request, 'list_snowboards.html', {'snowboards': snowboards})
