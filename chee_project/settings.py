@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'chee_home',
+    'chee_rental',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

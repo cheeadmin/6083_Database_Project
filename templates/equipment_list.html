@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment List</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+        }
+        ul {
+            list-style-type: none;
+        }
+        li {
+            margin: 10px 0;
+        }
+        .button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        input[type="date"] {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Equipment List</h1>
+        <ul>
+            {% for equipment in equipments %}
+                <li>
+                    {{ equipment.Brand }} - {{ equipment.Condition }}
+                    <form method="post" action="{% url 'add_to_rental_cart' equipment.equipmentID %}">
+                        {% csrf_token %}
+                        <input type="date" id="rental_date_{{ equipment.equipmentID }}" name="rental_date">
+                        <input type="date" id="return_date_{{ equipment.equipmentID }}" name="return_date">
+                        <button type="submit" class="button">Add to Rental Cart</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>    
+                <label for="rental_date">Rental Date:</label>
+                <input type="date" id="rental_date" name="rental_date">
+            </div>
+            <div>
+                <label for="return_date">Return Date:</label>
+                <input type="date" id="return_date" name="return_date">
+            </div>
+        </form>
+    </div>
+</body>
+</html>
