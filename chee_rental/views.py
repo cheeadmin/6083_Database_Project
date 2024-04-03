@@ -2,8 +2,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.db import connection
+from django.db import connection, transaction
 from datetime import datetime
+from django.urls import reverse
 from .models import Equipment
 from django.core.paginator import Paginator
 
@@ -63,10 +64,15 @@ def add_to_rental_cart(request, equipment_id):
                 return render(request, 'error.html', {'error': 'Daily price not found for the selected equipment'})
 
 @login_required
+@login_required
 def list_skis(request):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT Brand, Description, LastMaintenance, Size, Availability FROM mydb.Equipment WHERE typeID = 1")
+        cursor.execute("SELECT Brand, Description, LastMaintenance, Size, Availability, equipmentID FROM mydb.Equipment WHERE typeID = 1")
         skis_list = cursor.fetchall()
+    
+    # Log the structure of the first ski item, if available
+    if skis_list:
+        print("Structure of ski item:", skis_list[0])
 
     paginator = Paginator(skis_list, 20)  # Shows 20 skis per page.
     page_number = request.GET.get('page')
@@ -87,18 +93,51 @@ def list_snowboards(request):
     return render(request, 'list_snowboards.html', {'snowboards': snowboards})
 
 @login_required
+@login_required
 def rent_equipment(request, equipment_id):
-    with connection.cursor() as cursor:
-        cursor.execute("UPDATE Equipment SET Availability = FALSE WHERE equipmentID = %s", [equipment_id])
-        cursor.execute("""
-            INSERT INTO Rental (rentalDate, equipmentID, customerId) 
-            VALUES (CURRENT_DATE, %s, %s)
-        """, [equipment_id, request.user.id])
-    return redirect('equipment_list')
+    if request.method == 'POST':
+        # Begin your database transaction
+        with connection.cursor() as cursor:
+            # SQL to check if the equipment is available for rent
+            cursor.execute("SELECT Availability FROM Equipment WHERE equipmentID = %s", [equipment_id])
+            available = cursor.fetchone()
+
+            if available and available[0]:
+                # SQL to update equipment to unavailable
+                cursor.execute("UPDATE Equipment SET Availability = 0 WHERE equipmentID = %s", [equipment_id])
+                
+                # SQL to insert a new rental record
+                cursor.execute("INSERT INTO Rental (rentalDate, equipmentID, customerID) VALUES (NOW(), %s, %s)", [equipment_id, request.user.id])
+                
+                # Commit the changes
+                connection.commit()
+                return redirect(reverse('some_view_to_confirm_rental'))
+            else:
+                # Equipment is not available
+                # Redirect to an error page or show an error message
+                pass
+
+    # If not POST or if equipment is not available, redirect to equipment list
+    return redirect(reverse('equipment_list'))
 
 @login_required
 def return_equipment(request, equipment_id):
-    with connection.cursor() as cursor:
-        cursor.execute("UPDATE Equipment SET Availability = TRUE WHERE equipmentID = %s", [equipment_id])
-        cursor.execute("UPDATE Rental SET returnDate = CURRENT_DATE WHERE equipmentID = %s AND returnDate IS NULL", [equipment_id])
-    return redirect('equipment_list')
+    if request.method == 'POST':
+        with connection.cursor() as cursor:
+            # Wrap the SQL operations in a transaction to ensure data integrity
+            with transaction.atomic():
+                # Update the availability status of the equipment
+                cursor.execute("UPDATE Equipment SET Availability = TRUE WHERE equipmentID = %s", [equipment_id])
+                
+                # Update the return date of the rental record
+                cursor.execute("""
+                    UPDATE Rental 
+                    SET returnDate = CURRENT_DATE 
+                    WHERE equipmentID = %s AND returnDate IS NULL
+                """, [equipment_id])
+
+        # Redirect to the equipment list page
+        return redirect('equipment_list')  # Ensure you have a URL with the name 'equipment_list'
+    else:
+        # If not POST, redirect to equipment list or show an error message
+        return redirect('equipment_list')
