@@ -19,9 +19,6 @@
         .available {
             color: blue;
         }
-        .pagination {
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
@@ -36,30 +33,23 @@
             <th>Action</th>
         </tr>
         {% for snowboard in snowboards %}
+        {% if snowboard.4 %} <!-- Assuming snowboard.4 is the Availability -->
         <tr>
             <td>{{ snowboard.0 }}</td>
             <td>{{ snowboard.1 }}</td>
             <td>{{ snowboard.2 }}</td>
             <td>{{ snowboard.3 }}</td>
-            <td class="{% if snowboard.4 %}available{% else %}unavailable{% endif %}">{% if snowboard.4 %}Available{% else %}Unavailable{% endif %}</td>
+            <td class="available">Available</td>
             <td>
-                <button {% if not snowboard.4 %}disabled{% endif %}>Rent</button>
-                <button>Remove</button>
+                <form method="post" action="{% url 'rent_equipment' snowboard.5 %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="equipment_id" value="{{ snowboard.5 }}">
+                    <input type="submit" value="Rent">
+                </form>
             </td>
         </tr>
+        {% endif %}
         {% endfor %}
     </table>
-    <div class="pagination">
-        <!-- Correct the pagination variable names to 'snowboards' -->
-        <span>Page {{ snowboards.number }} of {{ snowboards.paginator.num_pages }}.</span>
-        {% if snowboards.has_previous %}
-            <a href="?page=1">&laquo; first</a>
-            <a href="?page={{ snowboards.previous_page_number }}">previous</a>
-        {% endif %}
-        {% if snowboards.has_next %}
-            <a href="?page={{ snowboards.next_page_number }}">next</a>
-            <a href="?page={{ snowboards.paginator.num_pages }}">last &raquo;</a>
-        {% endif %}
-    </div>
 </body>
 </html>
