@@ -1,8 +1,9 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.db import connection, transaction
+from django.db import connection, transaction, DatabaseError
 from datetime import datetime
 from django.urls import reverse
 from .models import Equipment
@@ -66,10 +67,12 @@ def add_to_rental_cart(request, equipment_id):
 @login_required
 def list_skis(request):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT equipmentID, Brand, Description, LastMaintenance, Size, Availability FROM mydb.Equipment WHERE typeID = 1 AND Availability = 1")
+        cursor.execute("""
+            SELECT equipmentID, Brand, Description, LastMaintenance, Size, Availability 
+            FROM mydb.Equipment 
+            WHERE typeID = 1 AND Availability = 1
+        """)
         skis_list = cursor.fetchall()
-    
-    # No need for paginator since you want to show all at once
     return render(request, 'list_skis.html', {'skis': skis_list})
 
 
@@ -84,12 +87,22 @@ def list_snowboards(request):
 
 @login_required
 def rent_equipment(request, equipment_id):
+    print(f"Attempting to rent equipment with ID: {equipment_id}")  # Debug log
     if request.method == 'POST':
         with connection.cursor() as cursor:
-            cursor.execute("UPDATE mydb.Equipment SET Availability = 0 WHERE equipmentID = %s", [equipment_id])
-            connection.commit()
-        return redirect('rent_ski')  # Corrected the URL name here
-    return redirect('rent_ski')  # Corrected the URL name here as well
+            cursor.execute("SELECT Availability FROM mydb.Equipment WHERE equipmentID = %s", [equipment_id])
+            available = cursor.fetchone()
+            if available and available[0]:
+                cursor.execute("UPDATE mydb.Equipment SET Availability = 0 WHERE equipmentID = %s", [equipment_id])
+                connection.commit()
+                messages.success(request, "Equipment rented successfully.")
+                return redirect('list_skis')
+            else:
+                messages.error(request, "This equipment is not available for rent.")
+                return redirect('list_skis')
+    else:
+        messages.error(request, "Invalid request.")
+        return redirect('list_skis')
 
 @login_required
 def return_equipment(request, equipment_id):
@@ -99,3 +112,8 @@ def return_equipment(request, equipment_id):
             connection.commit()
         return redirect('list_skis')
     return redirect('list_skis')  # Redirect here if not POST or something went wrong.
+
+@login_required
+def rental_error(request):
+    # You can pass more context or determine the error type if you have different error cases
+    return render(request, 'rental_error.html', {'error_message': 'The equipment is not available for rent.'})

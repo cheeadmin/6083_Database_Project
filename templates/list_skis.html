@@ -41,15 +41,14 @@
             <td>{{ ski.3 }}</td>
             <td class="available">Available</td>
             <td>
-                <form method="post" action="{% url 'rent_equipment' ski.5 %}">
+                <form method="post" action="{% url 'rent_equipment' ski.0 %}">
                     {% csrf_token %}
-                    <input type="hidden" name="equipment_id" value="{{ ski.5 }}">
                     <input type="submit" value="Rent">
                 </form>
             </td>
         </tr>
         {% endif %}
-        {% endfor %}
+    {% endfor %}
     </table>
 </body>
 </html>
