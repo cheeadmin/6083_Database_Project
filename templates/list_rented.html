@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of Rented Skis</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .unavailable {
+            color: red;
+        }
+        .available {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rented Ski Equipment List</h1>
+    <table>
+        <tr>
+            <th>Brand</th>
+            <th>Description</th>
+            <th>Rental Date</th>
+            <th>Return Date</th>
+            <th>Price</th>    
+            <th>Action</th>
+        </tr>
+        {% for rental in rentals %}
+        <tr>
+            <td>{{ rental.brand }}</td>
+            <td>{{ rental.description }}</td>
+            <td>{{ rental.rentalDate }}</td>
+            <td>{{ rental.returnDate }}</td>
+            <td>{{ rental.price }}</td>
+            <td>
+                <form method="post" action="{% url 'return_rental' rental.rentalID %}">
+                    {% csrf_token %}
+                    <button type="submit">Return</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'equipment_list' %}">Back to Equipment List</a>
+</body>
+</html>

@@ -19,12 +19,24 @@
         .available {
             color: blue;
         }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <h1>Ski Equipment List</h1>
     <table>
         <tr>
+            <th>EquipmentID</th>
             <th>Brand</th>
             <th>Description</th>
             <th>Last Maintenance</th>
@@ -33,22 +45,37 @@
             <th>Action</th>
         </tr>
         {% for ski in skis %}
-        {% if ski.4 %} <!-- Assuming ski.4 is the Availability -->
+        {% if ski.4 %}
         <tr>
             <td>{{ ski.0 }}</td>
             <td>{{ ski.1 }}</td>
             <td>{{ ski.2 }}</td>
             <td>{{ ski.3 }}</td>
+            <td>{{ ski.4 }}</td>
             <td class="available">Available</td>
             <td>
-                <form method="post" action="{% url 'rent_equipment' ski.0 %}">
+                <!-- Make sure this URL matches the name in your urls.py for the add_to_cart view -->
+                <form method="post" action="{% url 'add_to_cart' ski.0 %}">
                     {% csrf_token %}
-                    <input type="submit" value="Rent">
+                    <input type="submit" value="Rent" class="button">
                 </form>
             </td>
         </tr>
         {% endif %}
-    {% endfor %}
+        {% endfor %}
     </table>
+    <!-- Display messages if any -->
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <!-- Add a link to view the cart -->
+    <a href="{% url 'rental_cart' %}" class="button">View Cart</a>
+    <!-- Add a link to view rented items -->
+    <a href="{% url 'list_rented' %}" class="button">View Rented Items</a>
+    <a href="{% url 'home' %}" class="button">Back to Home</a>
 </body>
 </html>

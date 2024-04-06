@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Rental Cart</title>
+</head>
+<body>
+    <h1>Your Rental Cart</h1>
+    <ul>
+        {% for item in items %}
+            <li>
+                {{ item.1 }} - {{ item.2 }} - 
+                <form method="post" action="{% url 'remove_from_cart' item.0 %}">
+                    {% csrf_token %}
+                    <input type="submit" value="Remove">
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    <form method="post" action="{% url 'finalize_rental' %}">
+        {% csrf_token %}
+        <input type="submit" value="Finalize Rental">
+    </form>
+</body>
+</html>
