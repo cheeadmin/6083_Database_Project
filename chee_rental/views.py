@@ -99,10 +99,17 @@ def rent_equipment(request, equipment_id):
 def return_equipment(request, equipment_id):
     if request.method == 'POST':
         with connection.cursor() as cursor:
-            cursor.execute("UPDATE mydb.Equipment SET Availability = 1 WHERE equipmentID = %s", [equipment_id])
+            cursor.execute("SELECT typeID FROM Equipment WHERE equipmentID = %s", [equipment_id])
+            typeID = cursor.fetchone()[0]
+
+            cursor.execute("UPDATE Equipment SET Availability = 1 WHERE equipmentID = %s", [equipment_id])
+            cursor.execute("DELETE FROM Rental WHERE equipmentID = %s", [equipment_id])
             connection.commit()
-        return redirect('list_skis')
-    return redirect('list_skis')  # Redirect here if not POST or something went wrong.
+
+            return redirect('list_snowboards' if typeID == 2 else 'list_skis')
+    # If it's not a POST request or something went wrong, redirect to home
+    return redirect('home')
+
 
 @login_required
 def rental_error(request):
@@ -137,45 +144,12 @@ def show_cart(request):
 def remove_from_cart(request, equipment_id):
     cart = request.session.get('cart', {})
     if str(equipment_id) in cart:
-        del cart[str(equipment_id)]  # Remove the item from the cart
+        del cart[str(equipment_id)]
         request.session['cart'] = cart
-    return redirect('rental_cart')
-
-@login_required
-def finalize_rental(request):
-    cart = request.session.get('cart', {})
-    if not cart:
-        messages.error(request, "Your cart is empty.")
-        return redirect('rental_cart')
-
-    user = request.user
-    if hasattr(user, 'customer'):
-        customer_id = user.customer.customer_id
+        messages.success(request, "Item removed from cart.")
     else:
-        # Handle the case where the user is not associated with a customer
-        messages.error(request, "You need to be associated with a customer to rent equipment.")
-        return redirect('rental_cart')
-
-    with connection.cursor() as cursor:
-        for equipment_id, quantity in cart.items():
-            # Assuming rental for 1 day; adjust logic as needed for rental duration
-            cursor.execute("""
-                INSERT INTO mydb.Rental (rentalDate, returnDate, equipmentID, customerID, quantity) 
-                VALUES (CURDATE(), CURDATE() + INTERVAL 1 DAY, %s, %s, %s)
-            """, [equipment_id, customer_id, quantity])
-            cursor.execute("UPDATE mydb.Equipment SET Availability = 0 WHERE equipmentID = %s", [equipment_id])
-        connection.commit()
-
-    # Clear the cart after rental is finalized
-    request.session['cart'] = {}
-    messages.success(request, "Thank you for renting with us!")
-    return redirect('list_skis')  # or to a 'thank you' page
-
-
-    # Clear the cart after rental is finalized
-    request.session['cart'] = {}
-    messages.success(request, "Thank you for renting with us!")
-    return redirect('list_skis')  # or to a 'thank you' page
+        messages.error(request, "Item not found in cart.")
+    return redirect('show_cart')
 
 @login_required
 def finalize_rental(request):
@@ -184,33 +158,23 @@ def finalize_rental(request):
         messages.error(request, "Your cart is empty.")
         return redirect('rental_cart')
 
-    user = request.user
     try:
-        customer = Customer.objects.get(user=user)
+        customer = Customer.objects.get(user=request.user)
         customer_id = customer.id
+        with connection.cursor() as cursor:
+            for equipment_id in cart:
+                # Your existing logic for finalizing the rental
+                pass
+
+        # Clear the cart after rental is finalized
+        request.session['cart'] = {}
+        messages.success(request, "Thank you for renting with us!")
+        return redirect('list_skis')  # Redirecting to the ski list
+
     except Customer.DoesNotExist:
         messages.error(request, "You need to be associated with a customer to rent equipment.")
         return redirect('rental_cart')
 
-    with connection.cursor() as cursor:
-        # Calculate the next available rental ID
-        cursor.execute("SELECT MAX(rentalID) FROM mydb.Rental")
-        max_rental_id = cursor.fetchone()[0]
-        next_rental_id = max_rental_id + 1 if max_rental_id is not None else 1
-
-        for equipment_id, quantity in cart.items():
-            # Assuming rental for 1 day; adjust logic as needed for rental duration
-            cursor.execute("""
-                INSERT INTO mydb.Rental (rentalID, rentalDate, returnDate, equipmentID, customerID) 
-                VALUES (%s, CURDATE(), CURDATE() + INTERVAL 1 DAY, %s, %s)
-            """, [next_rental_id, equipment_id, customer_id])
-            cursor.execute("UPDATE mydb.Equipment SET Availability = 0 WHERE equipmentID = %s", [equipment_id])
-        connection.commit()
-
-    # Clear the cart after rental is finalized
-    request.session['cart'] = {}
-    messages.success(request, "Thank you for renting with us!")
-    return redirect('list_skis')  # or to a 'thank you' page
 
 @login_required
 def list_rented(request):

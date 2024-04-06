@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import add_to_cart, show_cart, remove_from_cart, finalize_rental, rent_equipment, list_rented, return_rental
+from .views import equipment_list, add_to_cart, show_cart, remove_from_cart, list_skis, list_snowboards, rent_equipment, return_equipment, finalize_rental, list_rented, return_rental
 
 urlpatterns = [
     path('', views.equipment_list, name='equipment_list'),
