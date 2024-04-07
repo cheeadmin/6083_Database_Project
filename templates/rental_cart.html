@@ -3,23 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <title>Your Rental Cart</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .button-red {
+            background-color: #dc3545;
+        }
+    </style>
 </head>
 <body>
     <h1>Your Rental Cart</h1>
-    <ul>
+    <table>
+        <tr>
+            <th>EquipmentID</th>
+            <th>Brand</th>
+            <th>Description</th>
+            <th>Last Maintenance</th>
+            <th>Size</th>
+            <th>Action</th>
+        </tr>
         {% for item in items %}
-            <li>
-                {{ item.1 }} - {{ item.2 }} - 
+        <tr>
+            <td>{{ item.0 }}</td>
+            <td>{{ item.1 }}</td>
+            <td>{{ item.2 }}</td>
+            <td>{{ item.3 }}</td>
+            <td>{{ item.4 }}</td>
+            <td>
                 <form method="post" action="{% url 'remove_from_cart' item.0 %}">
                     {% csrf_token %}
-                    <input type="submit" value="Remove">
+                    <input type="submit" value="Remove" class="button button-red">
                 </form>
-            </li>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Your cart is empty.</td>
+        </tr>
         {% endfor %}
-    </ul>
-    <form method="post" action="{% url 'finalize_rental' %}">
+    </table>
+    <form method="post" action="{% url 'finalize_rental' %}" style="margin-top: 20px;">
         {% csrf_token %}
-        <input type="submit" value="Finalize Rental">
+        <input type="submit" value="Finalize Rental" class="button">
     </form>
+    <a href="{% url 'list_skis' %}" class="button">Back to Ski Equipment List</a><br>
+    <a href="{% url 'home' %}" class="button">Back to Home</a>
 </body>
 </html>

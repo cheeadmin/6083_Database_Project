@@ -64,6 +64,7 @@ def add_to_rental_cart(request, equipment_id):
                 # Handle the case where the equipment's daily price is not found
                 return render(request, 'error.html', {'error': 'Daily price not found for the selected equipment'})
 
+
 @login_required
 def list_skis(request):
     with connection.cursor() as cursor:
@@ -118,12 +119,20 @@ def rental_error(request):
 
 @login_required
 def add_to_cart(request, equipment_id):
-    cart = request.session.get('cart', {})
-    if str(equipment_id) not in cart:
-        cart[str(equipment_id)] = 1  # you can store quantity as value if needed, here it's just set to 1
-    request.session['cart'] = cart
-    messages.success(request, "Item added to cart.")
-    return redirect('list_skis')
+    if request.method == 'POST':
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT Price, typeID FROM Equipment WHERE equipmentID = %s", [equipment_id])
+            result = cursor.fetchone()
+        if result:
+            price, typeID = result
+            # Convert Decimal to string before storing in session
+            cart = request.session.get('cart', {})
+            cart[str(equipment_id)] = {'typeID': typeID, 'price': str(price)}
+            request.session['cart'] = cart
+            messages.success(request, "Item added to cart.")
+        else:
+            messages.error(request, "Item not found.")
+        return HttpResponseRedirect(reverse('show_cart'))
 
 @login_required
 def show_cart(request):
@@ -158,18 +167,35 @@ def finalize_rental(request):
         messages.error(request, "Your cart is empty.")
         return redirect('rental_cart')
 
+    user = request.user
     try:
-        customer = Customer.objects.get(user=request.user)
+        customer = Customer.objects.get(user=user)
         customer_id = customer.id
         with connection.cursor() as cursor:
-            for equipment_id in cart:
-                # Your existing logic for finalizing the rental
-                pass
+            for equipment_id, details in cart.items():
+                cursor.execute("SELECT MAX(rentalID) FROM Rental")
+                max_rental_id = cursor.fetchone()[0]
+                next_rental_id = max_rental_id + 1 if max_rental_id is not None else 1
+                
+                # Calculate total price based on some business logic
+                total_price = details['price']  # Replace with actual calculation if needed
 
-        # Clear the cart after rental is finalized
+                cursor.execute("""
+                    INSERT INTO Rental (rentalID, rentalDate, returnDate, Price, equipmentID, customerId)
+                    VALUES (%s, CURDATE(), CURDATE() + INTERVAL 1 DAY, %s, %s, %s)
+                """, [next_rental_id, total_price, equipment_id, customer_id])
+                
+                cursor.execute("""
+                    UPDATE Equipment SET Availability = 0 WHERE equipmentID = %s
+                """, [equipment_id])
+
+            connection.commit()
+
         request.session['cart'] = {}
         messages.success(request, "Thank you for renting with us!")
-        return redirect('list_skis')  # Redirecting to the ski list
+        # Redirect to the ski list if all items in cart are skis; otherwise, redirect to snowboards
+        typeID = cart[next(iter(cart))]['typeID']
+        return redirect('list_skis' if typeID == 1 else 'list_snowboards')
 
     except Customer.DoesNotExist:
         messages.error(request, "You need to be associated with a customer to rent equipment.")

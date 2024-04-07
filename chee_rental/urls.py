@@ -11,6 +11,7 @@ urlpatterns = [
     path('rental/error/', views.rental_error, name='rental_error'),
     path('rental/return/<int:equipment_id>/', views.return_equipment, name='return_equipment'),
     path('rental/cart/', views.show_cart, name='rental_cart'),
+    path('rental/cart/', show_cart, name='show_cart'),
     path('rental/cart/add/<int:equipment_id>/', views.add_to_cart, name='add_to_cart'),
     path('rental/cart/remove/<int:equipment_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('rental/cart/finalize/', views.finalize_rental, name='finalize_rental'),
