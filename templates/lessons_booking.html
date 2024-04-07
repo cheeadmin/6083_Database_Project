@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lesson List</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <h1>Lesson List</h1>
+    <form action="{% url 'book_lesson' %}" method="post">
+        {% csrf_token %}
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Difficulty Level</th>
+                <th>Duration</th>
+                <th>Sport</th>
+                <th>Age</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+            {% for lesson in lessons %}
+            <tr>
+                <td>{{ lesson.lessonID }}</td>
+                <td>{{ lesson.difficultyLevel }}</td>
+                <td>{{ lesson.duration }}</td>
+                <td>{{ lesson.sport }}</td>
+                <td>{{ lesson.age }}</td>
+                <td>
+                    <!-- Date input for booking -->
+                    <input type="date" name="booking_date_{{ lesson.lessonID }}" required>
+                </td>
+                <td>
+                    <!-- Button to book the lesson -->
+                    <button type="submit" name="book_lesson" value="{{ lesson.lessonID }}" class="button">Book</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </form>
+    <a href="{% url 'home' %}" class="button">Back to Home</a>
+</body>
+</html>
