@@ -107,35 +107,58 @@ def cancel_booking(request, booking_id):
 
 @login_required
 def view_booked_lessons(request):
-    user_id = 7  # Hardcoded for testing, replace with request.user.id
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT lb.bookingID, lb.bookingDate, l.sport, l.age, l.duration, l.difficultyLevel
-            FROM LessonBookings lb
-            INNER JOIN Lessons l ON lb.lessonID = l.lessonID
-            WHERE lb.customerId = %s
-        """, [user_id])
-        bookings = cursor.fetchall()
+    user_id = request.user.id  # Use the logged-in user's ID
 
-    # Debug: Print bookings to the console.
-    print("Bookings:", bookings)
+    try:
+        with connection.cursor() as cursor:
+            # Fetch customer_id based on the logged-in user
+            cursor.execute("SELECT id FROM Customer WHERE user_id = %s", [user_id])
+            customer_result = cursor.fetchone()
+            customer_id = customer_result[0] if customer_result else None
 
-    bookings_list = [
-        {
-            'bookingID': booking[0],
-            'bookingDate': booking[1].strftime('%Y-%m-%d') if booking[1] else '',
-            'sport': booking[2],
-            'age': booking[3],
-            'duration': booking[4],
-            'difficultyLevel': booking[5],
+            # Handle case where customer_id is not found
+            if not customer_id:
+                messages.error(request, "Customer profile not found.")
+                return redirect('lessons_booking')
+
+            # Fetch the bookings
+            cursor.execute("""
+                SELECT lb.bookingID, lb.bookingDate, l.sport, l.age, l.duration, l.difficultyLevel
+                FROM LessonBookings lb
+                INNER JOIN Lessons l ON lb.lesson_id = l.lessonID
+                WHERE lb.customer_id = %s
+            """, [customer_id])
+            bookings = cursor.fetchall()
+
+        bookings_list = [
+            {
+                'bookingID': booking[0],
+                'bookingDate': booking[1].strftime('%Y-%m-%d') if booking[1] else '',
+                'sport': booking[2],
+                'age': booking[3],
+                'duration': booking[4],
+                'difficultyLevel': booking[5],
+            } for booking in bookings
+        ]
+
+        context = {
+            'bookings': bookings_list,
         }
-        for booking in bookings
-    ]
+        return render(request, 'view_booked_lessons.html', context)
 
-    # Debug: Print the formatted bookings list to the console.
-    print("Bookings list:", bookings_list)
+    except OperationalError as e:
+        # Log the error for debugging
+        print(f"An error occurred: {e}")
+        # Display a user-friendly message
+        messages.error(request, "An error occurred while fetching your bookings.")
+        # Redirect to a safe page
+        return redirect('lessons_booking')
 
-    context = {
-        'bookings': bookings_list,
-    }
-    return render(request, 'view_booked_lessons.html', context)
+    except Exception as e:
+        # Log the error for debugging
+        print(f"An unexpected error occurred: {e}")
+        # Display a user-friendly message
+        messages.error(request, "An unexpected error occurred.")
+        # Redirect to a safe page
+        return redirect('lessons_booking')
+
