@@ -29,40 +29,37 @@ def lessons_booking(request):
 def book_lesson(request, lesson_id):
     if request.method == 'POST':
         user_id = request.user.id
-        booking_date = request.POST.get('booking_date')  # Make sure this matches the name attribute in your form
+        booking_date = request.POST.get('booking_date')
 
         with connection.cursor() as cursor:
             # Fetch customer_id based on the logged-in user. Adjust the query according to your models.
             cursor.execute("SELECT id FROM Customer WHERE user_id = %s", [user_id])
             customer_result = cursor.fetchone()
-            customer_id = customer_result[0] if customer_result else None
 
-            # Handle case where customer_id is not found
-            if not customer_id:
+            if customer_result:
+                customer_id = customer_result[0]
+                # Fetch a random instructor
+                cursor.execute("SELECT instructorID FROM Instructors ORDER BY RAND() LIMIT 1")
+                instructor_result = cursor.fetchone()
+
+                if instructor_result:
+                    instructor_id = instructor_result[0]
+                    # Make sure to use 'customer_id' and 'instructor_id' as per your schema
+                    cursor.execute("""
+                        INSERT INTO LessonBookings (bookingDate, customer_id, instructor_id, lesson_id) 
+                        VALUES (%s, %s, %s, %s)
+                    """, [booking_date, customer_id, instructor_id, lesson_id])
+                    connection.commit()
+                    messages.success(request, "Lesson booked successfully!")
+                    return redirect('lessons_booking')
+                else:
+                    messages.error(request, "Instructor ID not found.")
+                    return redirect('lessons_booking')
+            else:
                 messages.error(request, "Customer ID not found.")
                 return redirect('lessons_booking')
-
-            # Selecting a random instructor from the Instructors table.
-            cursor.execute("SELECT instructorID FROM Instructors ORDER BY RAND() LIMIT 1")
-            instructor_result = cursor.fetchone()
-            instructor_id = instructor_result[0] if instructor_result else None
-
-            # Handle case where instructor_id is not found
-            if not instructor_id:
-                messages.error(request, "Instructor ID not found.")
-                return redirect('lessons_booking')
-
-            # Insert booking details into LessonBookings table
-            cursor.execute(
-                "INSERT INTO LessonBookings (bookingDate, customerId, instructorID, lessonID) VALUES (%s, %s, %s, %s)",
-                [booking_date, customer_id, instructor_id, lesson_id]
-            )
-            connection.commit()
-
-        messages.success(request, "Lesson booked successfully!")
         return redirect('lessons_booking')
     else:
-        # Redirect back to the booking page or show an error if accessed without POST request
         messages.error(request, "Invalid request method.")
         return redirect('lessons_booking')
 
