@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 class Staff(models.Model):
@@ -26,3 +27,13 @@ class Lesson(models.Model):
 
     class Meta:
         db_table = 'Lessons'
+
+class LessonBooking(models.Model):  # Ensure that the class name matches your import
+    bookingID = models.AutoField(primary_key=True)
+    bookingDate = models.DateField()
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    instructor = models.ForeignKey('Instructor', on_delete=models.CASCADE)
+    lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'LessonBookings'

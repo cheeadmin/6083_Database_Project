@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Lesson List</title>
-    {% load static %}
+    <title>Booked Lessons</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,26 +43,26 @@
             align-items: center;
             padding: 20px;
         }
-        input[type="date"] {
+        input[type="date"], input[type="submit"] {
             padding: 10px;
             margin-right: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
         }
         input[type="submit"] {
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
             background-color: #5cb85c;
             color: white;
         }
         input[type="submit"]:hover {
             background-color: #4cae4c;
         }
+        form {
+            display: inline;
+        }
     </style>
 </head>
 <body>
-    <h1>Lesson List</h1>
+    <h1>Booked Lessons</h1>
     {% if messages %}
         <div class="center">
             {% for message in messages %}
@@ -73,38 +72,35 @@
     {% endif %}
     <table>
         <tr>
-            <th>ID</th>
-            <th>Difficulty Level</th>
-            <th>Duration</th>
+            <th>Booking Date</th>
             <th>Sport</th>
             <th>Age</th>
-            <th>Date</th>
-            <th>Action</th>
+            <th>Duration</th>
+            <th>Difficulty Level</th>
+            <th>Edit</th>
+            <th>Cancel</th>
         </tr>
-        {% for lesson in lessons %}
+        {% for booking in bookings %}
         <tr>
-            <form action="{% url 'book_lesson' lesson.lessonID %}" method="post">
-                {% csrf_token %}
-                <td>{{ lesson.lessonID }}</td>
-                <td>{{ lesson.difficultyLevel }}</td>
-                <td>{{ lesson.duration }}</td>
-                <td>{{ lesson.sport }}</td>
-                <td>{{ lesson.age }}</td>
-                <td>
-                    <input type="date" name="booking_date" required>
-                </td>
-                <td>
-                    <input type="submit" value="Book" class="button">
-                </td>
-            </form>
+            <td>{{ booking.bookingDate }}</td>
+            <td>{{ booking.sport }}</td>
+            <td>{{ booking.age }}</td>
+            <td>{{ booking.duration }}</td>
+            <td>{{ booking.difficultyLevel }}</td>
+            <td>
+                <a href="{% url 'edit_booking' booking.bookingID %}" class="button">Edit</a>
+            </td>
+            <td>
+                <form action="{% url 'cancel_booking' booking.bookingID %}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Cancel" class="button">
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </table>
-    <form action="{% url 'view_booked_lessons' %}" method="get">
-        <input type="submit" value="View Booked Lessons" class="button">
-    </form>
     <div class="center">
-        <a href="{% url 'home' %}" class="button">Back to Home</a>
+        <a href="{% url 'lessons_booking' %}" class="button">Back to Lesson Booking</a>
     </div>
 </body>
 </html>

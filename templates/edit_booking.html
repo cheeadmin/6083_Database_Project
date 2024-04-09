@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Booking</title>
+    <!-- Include your styles.css and any other required CSS or JS here -->
+</head>
+<body>
+    <h1>Edit Booking</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="booking_date">Booking Date:</label>
+        <input type="date" id="booking_date" name="booking_date" value="{{ booking.bookingDate|date:'Y-m-d' }}" required>
+        <label for="lesson">Select Lesson:</label>
+        <select id="lesson" name="new_lesson">
+            {% for lesson in lessons %}
+                <option value="{{ lesson.lessonID }}" {% if lesson.lessonID == booking.lessonID %}selected{% endif %}>
+                    {{ lesson.sport }} - {{ lesson.age }} - {{ lesson.duration }} - {{ lesson.difficultyLevel }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Update Booking">
+    </form>
+</body>
+</html>
