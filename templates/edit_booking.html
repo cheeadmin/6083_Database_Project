@@ -3,23 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit Booking</title>
-    <!-- Include your styles.css and any other required CSS or JS here -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            margin-right: 10px;
+        }
+        input[type="date"],
+        select,
+        input[type="submit"] {
+            padding: 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #4cae4c;
+        }
+        .button-back {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .button-back:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <h1>Edit Booking</h1>
-    <form method="post">
-        {% csrf_token %}
-        <label for="booking_date">Booking Date:</label>
-        <input type="date" id="booking_date" name="booking_date" value="{{ booking.bookingDate|date:'Y-m-d' }}" required>
-        <label for="lesson">Select Lesson:</label>
-        <select id="lesson" name="new_lesson">
-            {% for lesson in lessons %}
-                <option value="{{ lesson.lessonID }}" {% if lesson.lessonID == booking.lessonID %}selected{% endif %}>
-                    {{ lesson.sport }} - {{ lesson.age }} - {{ lesson.duration }} - {{ lesson.difficultyLevel }}
-                </option>
-            {% endfor %}
-        </select>
-        <input type="submit" value="Update Booking">
-    </form>
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="booking_date">Booking Date:</label>
+                <input type="date" id="booking_date" name="booking_date" value="{{ booking.bookingDate }}" required>
+            </div>
+            <div class="form-group">
+                <label for="lesson">Select Lesson:</label>
+                <select id="lesson" name="new_lesson">
+                    {% for lesson in lessons %}
+                        <option value="{{ lesson.lessonID }}" {% if lesson.lessonID == booking.current_lesson_id %}selected{% endif %}>
+                            {{ lesson.sport }} - {{ lesson.age }} - {{ lesson.duration }} - {{ lesson.difficultyLevel }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Update Booking">
+            </div>
+        </form>
+        <a href="{% url 'view_booked_lessons' %}" class="button-back">Back to Booked Lessons</a>
+    </div>
 </body>
 </html>

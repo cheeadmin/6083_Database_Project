@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db import connection
+from django.db import connection, OperationalError
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Lesson, LessonBooking
+from django.http import Http404, HttpResponse
+from django.core.exceptions import PermissionDenied
 
 def lessons_booking(request):
     with connection.cursor() as cursor:
@@ -65,45 +67,63 @@ def book_lesson(request, lesson_id):
 
 @login_required
 def edit_booking(request, booking_id):
-    # Ensure you import LessonBookings with the correct path
-    booking = get_object_or_404(LessonBookings, pk=booking_id, customer=request.user)
+    # Get all lessons to populate the select field
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT lessonID, difficultyLevel, duration, sport, age FROM Lessons")
+        lessons = cursor.fetchall()
+        lessons_list = [
+            {
+                'lessonID': lesson[0],
+                'difficultyLevel': lesson[1],
+                'duration': lesson[2],
+                'sport': lesson[3],
+                'age': lesson[4],
+            }
+            for lesson in lessons
+        ]
 
-    # Fetch all lessons to choose from
-    lessons = Lesson.objects.all().values('lessonID', 'difficultyLevel', 'duration', 'sport', 'age')
-    
+    # If the form has been submitted, process the form data
     if request.method == 'POST':
         new_lesson_id = request.POST.get('new_lesson')
-        booking_date = request.POST.get('booking_date')  # Ensure your form has a field for booking_date
-
-        # Perform the update with raw SQL
+        booking_date = request.POST.get('booking_date')
+        
+        # Update the booking in the database
         with connection.cursor() as cursor:
             cursor.execute("""
-                UPDATE LessonBookings 
-                SET lessonID = %s, bookingDate = %s 
+                UPDATE LessonBookings
+                SET lesson_id = %s, bookingDate = %s
                 WHERE bookingID = %s
             """, [new_lesson_id, booking_date, booking_id])
             connection.commit()
-
+        
         messages.success(request, "Booking updated successfully.")
         return redirect('view_booked_lessons')
-
-    context = {
-        'booking': booking,
-        'lessons': lessons
-    }
-
-    return render(request, 'edit_booking.html', context)
-
-@login_required
-def cancel_booking(request, booking_id):
-    if request.method == 'POST':
+    
+    # If it's a GET request, we fetch the booking info to prefill the form
+    try:
         with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM LessonBookings WHERE bookingID = %s", [booking_id])
-            connection.commit()
-        messages.success(request, "Booking cancelled successfully.")
-    else:
-        messages.error(request, "You can only cancel a booking with a POST request.")
-    return redirect('view_booked_lessons')
+            cursor.execute("SELECT bookingID, bookingDate, lesson_id FROM LessonBookings WHERE bookingID = %s", [booking_id])
+            booking = cursor.fetchone()
+            if not booking:
+                raise Http404("Booking not found.")
+
+        # Prepare the booking info for the context
+        booking_info = {
+            'bookingID': booking[0],
+            'bookingDate': booking[1].strftime('%Y-%m-%d'),
+            'lessonID': booking[2],
+        }
+        
+        # Render the edit page
+        return render(request, 'edit_booking.html', {
+            'booking': booking_info,
+            'lessons': lessons_list,
+        })
+    
+    except Exception as e:
+        messages.error(request, "An error occurred while fetching the booking for editing.")
+        return redirect('view_booked_lessons')
+
 
 @login_required
 def view_booked_lessons(request):
@@ -162,3 +182,14 @@ def view_booked_lessons(request):
         # Redirect to a safe page
         return redirect('lessons_booking')
 
+@login_required
+def cancel_booking(request, booking_id):
+    if request.method == 'POST':
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM LessonBookings WHERE bookingID = %s", [booking_id])
+            connection.commit()
+        messages.success(request, "Booking cancelled successfully.")
+        return redirect('view_booked_lessons')
+    else:
+        messages.error(request, "You can only cancel a booking with a POST request.")
+        return redirect('lessons_booking')
