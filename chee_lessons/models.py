@@ -2,6 +2,12 @@ from django.conf import settings
 from django.db import models
 
 class Staff(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='staff_profile',
+        null=True  # Assuming not all users are staff
+    )
     staffID = models.AutoField(primary_key=True)
     firstName = models.CharField(max_length=100, blank=True, null=True)
     lastName = models.CharField(max_length=100, blank=True, null=True)
