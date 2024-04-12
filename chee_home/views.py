@@ -6,7 +6,7 @@ from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from django.db import connection, IntegrityError
 from .database import get_customer_by_id
 from django.contrib.auth.decorators import login_required
-from chee_lessons.models import Staff
+from .models import Customer, Staff
 import re
 
 # Create your views here.
@@ -99,30 +99,6 @@ def register_staff(request):
             return render(request, 'register_staff.html')
 
     return render(request, 'register_staff.html')
-
-@login_required
-def list_staff(request):
-    staff_members = Staff.objects.select_related('user').all()
-    return render(request, 'list_staff.html', {'staff_members': staff_members})
-
-@login_required
-def add_staff(request):
-    if request.method == 'POST':
-        # Collect form data
-        username = request.POST['username']
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
-        role = request.POST['role']
-        contact_details = request.POST['contact_details']
-        password = request.POST['password']
-
-        # Create User and Staff records
-        user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name, password=password)
-        Staff.objects.create(user=user, firstName=first_name, lastName=last_name, role=role, contactDetails=contact_details)
-
-        return redirect('list_staff')
-
-    return render(request, 'add_staff.html')
 
 @login_required
 def home_view(request):
