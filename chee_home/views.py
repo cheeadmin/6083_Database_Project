@@ -1,11 +1,12 @@
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
-from django.db import connection
+from django.db import connection, IntegrityError
 from .database import get_customer_by_id
 from django.contrib.auth.decorators import login_required
-from .models import Customer
+from .models import Customer, Staff
 import re
 
 # Create your views here.
@@ -62,17 +63,49 @@ def signup(request):
 
     return render(request, 'signup.html')
 
-# def my_custom_sql_query(request):
-#     with connection.cursor() as cursor:
-#         cursor.execute("SELECT * FROM my_table WHERE column = %s", [value])
-#         result = cursor.fetchone()
 
-#     return HttpResponse(result)
+@login_required
+def register_staff(request):
+    if not request.user.is_staff:
+        messages.error(request, "Unauthorized access.")
+        return redirect('home')
 
-# views.py
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        email = request.POST['contact_details']
+        role = request.POST['role']
 
+        try:
+            user = User.objects.create_user(username, email, password)
+            user.first_name = first_name
+            user.last_name = last_name
+            user.is_staff = True  # Set True if every staff member should have access to the admin site
+            user.save()
+
+            Staff.objects.create(
+                user=user,
+                firstName=first_name,
+                lastName=last_name,
+                role=role,
+                contactDetails=email
+            )
+            messages.success(request, "Staff member registered successfully.")
+            return redirect('home')
+        except IntegrityError as e:
+            messages.error(request, f"Error creating staff member: {e}")
+            return render(request, 'register_staff.html')
+
+    return render(request, 'register_staff.html')
+
+@login_required
 def home_view(request):
-    return render(request, 'home.html')
+    if request.user.is_staff:
+        return render(request, 'home_staff.html')
+    else:
+        return render(request, 'home.html')
     
 def show_customer(request, customer_id):
     customer = get_customer_by_id(customer_id)

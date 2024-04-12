@@ -4,7 +4,7 @@ from django.views.generic.base import RedirectView
 from django.contrib.auth.views import LogoutView
 from .views import (
     index, user_login, signup, unauthorized, create_customer_profile, home_view,
-    read_customer_profiles, update_customer_profile, delete_customer_profile, user_view,
+    read_customer_profiles, update_customer_profile, delete_customer_profile, user_view, register_staff
 )
 
 urlpatterns = [
@@ -18,6 +18,6 @@ urlpatterns = [
     path('profile/update/<int:profile_id>/', update_customer_profile, name='update_customer_profile'),
     path('profile/delete/<int:profile_id>/', delete_customer_profile, name='delete_customer_profile'),
     path('user/', user_view, name='user'),
-    # Add logout URL
+    path('register-staff/', register_staff, name='register_staff'),
     path('logout/', auth_views.LogoutView.as_view(next_page='index'), name='logout'),
 ]

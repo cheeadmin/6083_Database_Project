@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Homepage</title>
+    <title>Staff Homepage</title>
     <style>
         .container {
             display: flex;
@@ -58,22 +58,22 @@
     </style>
 </head>
 <body>
-    <h1>Welcome to Chee's Ski and Snowboard Rental</h1>
+    <h1>Welcome to Chee's Staff Portal</h1>
     <div class="container">
         <div class="column">
-            <h2>RENT SKI OR SNOWBOARD</h2>
-            <p>Description for rental services...</p>
-            <a href="{% url 'equipment_list' %}" class="button">Go to rental</a>
+            <h2>EQUIPMENT MAINTENANCE</h2>
+            <p>Access equipment maintenance records.</p>
+            <a href="/equipment-maintenance" class="button">Equipment Maintenance</a>
         </div>
         <div class="column">
-            <h2>LESSONS BOOKING</h2>
-            <p>Information on booking lessons...</p>
-            <a href="/lessons-booking" class="button">Book lessons</a>
+            <h2>STAFF MAINTENANCE</h2>
+            <p>Edit staff records and details.</p>
+            <a href="/staff-maintenance" class="button">Staff Maintenance</a>
         </div>
         <div class="column">
-            <h2>PROFILE MANAGEMENT</h2>
-            <p>Manage your profile details here.</p>
-            <a href="{% url 'user' %}" class="button">Manage your profile</a>
+            <h2>LESSON MANAGEMENT</h2>
+            <p>Manage lesson schedules and information.</p>
+            <a href="/lesson-management" class="button">Lesson Management</a>
         </div>
         <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}
