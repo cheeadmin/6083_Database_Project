@@ -131,14 +131,40 @@ def edit_staff(request, staff_id):
     if not request.user.is_staff:
         messages.error(request, "Unauthorized access.")
         return redirect('home')
-    
+
+    # Fetch the associated user_id for the staff member
+    user_id = None
     with connection.cursor() as cursor:
-        cursor.execute("SELECT s.staffID, s.firstName, s.lastName, s.contactDetails, s.role, u.username, u.email "
-                       "FROM Staff s "
-                       "JOIN auth_user u ON s.user_id = u.id "
-                       "WHERE s.staffID = %s", [staff_id])
-        staff = cursor.fetchone()
+        cursor.execute("SELECT user_id FROM Staff WHERE staffID = %s", [staff_id])
+        user_row = cursor.fetchone()
+        if user_row:
+            user_id = user_row[0]
     
+    # If no matching staff member found, raise a 404 error
+    if user_id is None:
+        raise Http404('Staff member not found.')
+
+    # Fetch the existing staff details including the username
+    staff = None
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT s.staffID, s.firstName, s.lastName, s.contactDetails, s.role, u.username, u.email
+            FROM Staff s
+            JOIN auth_user u ON s.user_id = u.id
+            WHERE s.staffID = %s
+        """, [staff_id])
+        staff_row = cursor.fetchone()
+        if staff_row:
+            staff = {
+                'staffID': staff_row[0], 
+                'firstName': staff_row[1], 
+                'lastName': staff_row[2],
+                'contactDetails': staff_row[3], 
+                'role': staff_row[4],
+                'username': staff_row[5],
+                'email': staff_row[6]
+            }
+
     if request.method == 'POST':
         username = request.POST['username']
         first_name = request.POST['first_name']
@@ -146,18 +172,28 @@ def edit_staff(request, staff_id):
         email = request.POST['email']
         role = request.POST['role']
         
-        with connection.cursor() as cursor:
-            cursor.execute("UPDATE auth_user SET username = %s, first_name = %s, last_name = %s, email = %s "
-                           "WHERE id = (SELECT user_id FROM Staff WHERE staffID = %s)",
-                           [username, first_name, last_name, email, staff_id])
-            cursor.execute("UPDATE Staff SET firstName = %s, lastName = %s, contactDetails = %s, role = %s "
-                           "WHERE staffID = %s",
-                           [first_name, last_name, email, role, staff_id])
-        return redirect('list_staff')
+        try:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    # Update the auth_user table
+                    cursor.execute("""
+                        UPDATE auth_user SET username = %s, first_name = %s, last_name = %s, email = %s 
+                        WHERE id = %s
+                    """, [username, first_name, last_name, email, user_id])
+
+                    # Update the Staff table
+                    cursor.execute("""
+                        UPDATE Staff SET firstName = %s, lastName = %s, contactDetails = %s, role = %s 
+                        WHERE staffID = %s
+                    """, [first_name, last_name, email, role, staff_id])
+
+                messages.success(request, "Staff member updated successfully.")
+                return redirect('list_staff')
+        except IntegrityError as e:
+            messages.error(request, f"An error occurred while updating: {e}")
+            return render(request, 'edit_staff.html', {'staff': staff, 'error_message': str(e)})
     
     return render(request, 'edit_staff.html', {'staff': staff})
-
-from django.db import connection
 
 @login_required
 def delete_staff(request, staff_id):

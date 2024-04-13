@@ -3,30 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <title>Add Staff Member</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        input[type=text],
+        input[type=email],
+        input[type=password],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 20px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type=submit] {
+            width: 100%;
+            background-color: #007bff;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type=submit]:hover {
+            background-color: #0056b3;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .messages {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: #d9534f;
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+        }
+        .center {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Add Staff Member</h1>
-    {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-            {% endfor %}
+    <div class="container">
+        <h1>Add Staff Member</h1>
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            Username: <input type="text" name="username" required><br>
+            First Name: <input type="text" name="first_name" required><br>
+            Last Name: <input type="text" name="last_name" required><br>
+            Role:
+            <select name="role" required>
+                <option value="Instructor">Instructor</option>
+                <option value="Associate">Associate</option>
+            </select><br>
+            Phone Number: <input type="text" name="contact_details" required><br>
+            Email: <input type="email" name="email" required><br>
+            Password: <input type="password" name="password" required><br>
+            <input type="submit" value="Submit">
+        </form>
+        <div class="center">
+            <a href="{% url 'home' %}" class="button">Back to Home</a>
         </div>
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        Username: <input type="text" name="username" required><br>
-        First Name: <input type="text" name="first_name" required><br>
-        Last Name: <input type="text" name="last_name" required><br>
-        Role:
-        <select name="role" required>
-            <option value="Instructor">Instructor</option>
-            <option value="Associate">Associate</option>
-        </select><br>
-        Phone Number: <input type="text" name="contact_details" required><br>
-        Email: <input type="email" name="email" required><br>
-        Password: <input type="password" name="password" required><br>
-        <input type="submit" value="Add Staff Member">
-    </form>
+    </div>
 </body>
 </html>
