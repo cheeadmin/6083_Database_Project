@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Staff Member</title>
+</head>
+<body>
+    <h1>Add Staff Member</h1>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        Username: <input type="text" name="username" required><br>
+        First Name: <input type="text" name="first_name" required><br>
+        Last Name: <input type="text" name="last_name" required><br>
+        Role:
+        <select name="role" required>
+            <option value="Instructor">Instructor</option>
+            <option value="Associate">Associate</option>
+        </select><br>
+        Phone Number: <input type="text" name="contact_details" required><br>
+        Email: <input type="email" name="email" required><br>
+        Password: <input type="password" name="password" required><br>
+        <input type="submit" value="Add Staff Member">
+    </form>
+</body>
+</html>

@@ -86,6 +86,7 @@ DATABASES = {
         'NAME': 'mydb',
         'USER': 'django_user',
         'PASSWORD': 'your_password',
+        'ATOMIC_REQUESTS': True,
         'HOST': 'localhost',  # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }

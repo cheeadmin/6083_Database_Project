@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Your head content here -->
+</head>
+<body>
+    <h1>Edit Staff Member</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" value="{{ staff.5 }}" required>
+        <!-- Include other fields similarly -->
+        <!-- staff.0 will be staffID, staff.1 firstName, etc. according to the SELECT order -->
+        <button type="submit">Update Staff</button>
+    </form>
+</body>
+</html>
