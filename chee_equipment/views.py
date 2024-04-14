@@ -103,6 +103,21 @@ def edit_equipment(request, equipment_id):
 
 @login_required
 def delete_equipment(request, equipment_id):
-    equipment = get_object_or_404(Equipment, pk=equipment_id)
-    equipment.delete()
-    return redirect('chee_equipment:list_equipment')
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        try:
+            # Use the atomic block to wrap the delete operation in a transaction.
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    cursor.execute("DELETE FROM Equipment WHERE equipmentID = %s", [equipment_id])
+                messages.success(request, 'Equipment deleted successfully!')
+        except Exception as e:
+            # If there is any exception, rollback the transaction and show an error message.
+            messages.error(request, f'Error deleting equipment: {e}')
+        
+        return redirect('chee_equipment:list_equipment')
+
+    # If the request method is not POST, it's an invalid request for this action.
+    return HttpResponseBadRequest("Invalid request method.")
