@@ -39,16 +39,16 @@
     <h1>Edit Equipment</h1>
     <form action="" method="post">
         {% csrf_token %}
-        Brand: <input type="text" name="brand" value="{{ equipment.brand }}" required><br>
-        Description: <input type="text" name="description" value="{{ equipment.description }}" required><br>
+        Brand: <input type="text" name="Brand" value="{{ equipment.Brand }}" required><br>
+        Description: <input type="text" name="Description" value="{{ equipment.Description }}" required><br>
         Type ID: <input type="number" name="typeID" value="{{ equipment.typeID }}" required><br>
-        Availability: <select name="availability" required>
-            <option value="1" {% if equipment.availability %}selected{% endif %}>Available</option>
-            <option value="0" {% if not equipment.availability %}selected{% endif %}>Not Available</option>
+        Availability: <select name="Availability" required>
+            <option value="1" {% if equipment.Availability %}selected{% endif %}>Available</option>
+            <option value="0" {% if not equipment.Availability %}selected{% endif %}>Not Available</option>
         </select><br>
-        Last Maintenance: <input type="date" name="lastMaintenance" value="{{ equipment.lastMaintenance|date:'Y-m-d' }}" required><br>
-        Price: <input type="text" name="price" value="{{ equipment.price }}" required><br>
-        Size: <input type="number" name="size" value="{{ equipment.size }}" required><br>
+        Last Maintenance: <input type="date" name="LastMaintenance" value="{{ equipment.LastMaintenance|date:'Y-m-d' }}" required><br>
+        Price: <input type="text" name="Price" value="{{ equipment.Price }}" required><br>
+        Size: <input type="text" name="Size" value="{{ equipment.Size }}" required><br>
         <input type="submit" value="Update Equipment">
     </form>
 </body>
