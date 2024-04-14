@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Equipment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            width: 50%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        input, select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        input[type="submit"] {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edit Equipment</h1>
+    <form action="" method="post">
+        {% csrf_token %}
+        Brand: <input type="text" name="brand" value="{{ equipment.brand }}" required><br>
+        Description: <input type="text" name="description" value="{{ equipment.description }}" required><br>
+        Type ID: <input type="number" name="typeID" value="{{ equipment.typeID }}" required><br>
+        Availability: <select name="availability" required>
+            <option value="1" {% if equipment.availability %}selected{% endif %}>Available</option>
+            <option value="0" {% if not equipment.availability %}selected{% endif %}>Not Available</option>
+        </select><br>
+        Last Maintenance: <input type="date" name="lastMaintenance" value="{{ equipment.lastMaintenance|date:'Y-m-d' }}" required><br>
+        Price: <input type="text" name="price" value="{{ equipment.price }}" required><br>
+        Size: <input type="number" name="size" value="{{ equipment.size }}" required><br>
+        <input type="submit" value="Update Equipment">
+    </form>
+</body>
+</html>
