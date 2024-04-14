@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db import connection, OperationalError
+from django.db import connection, OperationalError,  IntegrityError, DataError, transaction
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Lesson, LessonBooking
@@ -193,3 +193,131 @@ def cancel_booking(request, booking_id):
     else:
         messages.error(request, "You can only cancel a booking with a POST request.")
         return redirect('lessons_booking')
+
+@login_required
+def list_lessons(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM Lessons")
+        lessons_tuples = cursor.fetchall()
+        lessons = [
+            {'lessonID': lesson[0], 'difficultyLevel': lesson[1], 'duration': lesson[2], 'sport': lesson[3], 'age': lesson[4]}
+            for lesson in lessons_tuples
+        ]
+
+    return render(request, 'list_lessons.html', {'lessons': lessons})
+
+@login_required
+def add_lesson(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        difficultyLevel = request.POST['difficultyLevel']
+        duration = request.POST['duration']
+        sport = request.POST['sport']
+        age = request.POST['age']
+
+        try:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO Lessons (difficultyLevel, duration, sport, age)
+                        VALUES (%s, %s, %s, %s)
+                    """, [difficultyLevel, duration, sport, age])
+                messages.success(request, 'Lesson added successfully!')
+        except Exception as e:
+            messages.error(request, f'Error adding lesson: {str(e)}')
+
+        return redirect('list_lessons')
+
+    return render(request, 'add_lesson.html')
+
+@login_required
+def edit_lesson(request, lesson_id):
+    if not request.user.is_staff:
+        messages.error(request, "Unauthorized access.")
+        return redirect('home')
+
+    lesson_dict = {}
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Lessons WHERE lessonID = %s", [lesson_id])
+            lesson = cursor.fetchone()
+            if lesson:
+                lesson_dict = {
+                    'lessonID': lesson[0],
+                    'difficultyLevel': lesson[1],
+                    'duration': lesson[2],
+                    'sport': lesson[3],
+                    'age': lesson[4]
+                }
+            else:
+                raise Http404("Lesson not found.")
+    except Exception as e:
+        messages.error(request, str(e))
+        return redirect('lesson_management')
+
+    if request.method == 'POST':
+        difficultyLevel = request.POST.get('difficultyLevel')
+        duration = request.POST.get('duration')
+        sport = request.POST.get('sport')
+        age = request.POST.get('age')
+
+        # Ensure that the duration and age values do not exceed their column size
+        if len(duration) > 8 or len(age) > 5:
+            messages.error(request, "Duration or Age values are too long.")
+            return render(request, 'edit_lesson.html', {'lesson': lesson_dict})
+
+        try:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE Lessons SET
+                        difficultyLevel = %s,
+                        duration = %s,
+                        sport = %s,
+                        age = %s
+                        WHERE lessonID = %s
+                    """, [difficultyLevel, duration, sport, age, lesson_id])
+            messages.success(request, "Lesson updated successfully!")
+        except Exception as e:
+            messages.error(request, "An error occurred: " + str(e))
+            # Rollback is handled automatically by the transaction.atomic block if an exception occurs
+
+        return redirect('lesson_management')
+
+    return render(request, 'edit_lesson.html', {'lesson': lesson_dict})
+
+@login_required
+def delete_lesson(request, lesson_id):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        try:
+            # Use the atomic block to wrap the delete operation in a transaction.
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    cursor.execute("DELETE FROM Lessons WHERE lessonID = %s", [lesson_id])
+                messages.success(request, 'Lesson deleted successfully!')
+        except Exception as e:
+            # If there is any exception, rollback the transaction and show an error message.
+            messages.error(request, f'Error deleting lesson: {e}')
+        
+        return redirect('list_lessons')
+
+    messages.error(request, 'Invalid request method.')
+    return redirect('list_lessons')
+
+@login_required
+def lesson_management(request):
+    if not request.user.is_staff:
+        # Only staff can manage lessons
+        return redirect('unauthorized')
+    
+    # You can fetch lessons or perform other logic here
+    lessons = Lesson.objects.all()  # Assuming you have a Lesson model
+    return render(request, 'list_lessons.html', {'lessons': lessons})
