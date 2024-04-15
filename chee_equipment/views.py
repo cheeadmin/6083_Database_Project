@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
 from django.contrib import messages
@@ -121,3 +122,86 @@ def delete_equipment(request, equipment_id):
 
     # If the request method is not POST, it's an invalid request for this action.
     return HttpResponseBadRequest("Invalid request method.")
+
+@login_required
+def add_equipment_to_maintenance(request, equipment_id):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        try:
+            with connection.cursor() as cursor:
+                # Call the stored procedure to update the equipment's availability
+                cursor.execute("CALL AddEquipmentToMaintenance(%s)", [equipment_id])
+                
+                # Insert the maintenance record if the stored procedure does not already do this
+                current_date = datetime.now().strftime('%Y-%m-%d')
+                maintenance_type = 'Scheduled'  # Or get this value from the request
+                
+                cursor.execute(
+                    "INSERT INTO EquipmentMaintenance (maintenanceDate, maintenanceType, equipmentID) VALUES (%s, %s, %s)",
+                    [current_date, maintenance_type, equipment_id]
+                )
+                
+            messages.success(request, 'Equipment added to maintenance successfully.')
+        except Exception as e:
+            # Make sure to catch the specific exception if possible, instead of a general exception
+            messages.error(request, f'Error adding equipment to maintenance: {e}')
+        finally:
+            # It is good practice to close the cursor when done
+            cursor.close()
+        
+        return redirect('chee_equipment:list_maintenance_equipments')
+    
+    else:
+        return HttpResponseBadRequest("Invalid request method.")
+
+
+@login_required
+def delete_equipment_from_maintenance(request, maintenance_id):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM EquipmentMaintenance WHERE maintenanceID = %s", [maintenance_id])
+                messages.success(request, 'Maintenance record deleted successfully.')
+        except Exception as e:
+            messages.error(request, f'Error deleting maintenance record: {str(e)}')
+        return redirect('chee_equipment:equipment_maintenance')
+
+    else:
+        return HttpResponseBadRequest("Invalid request method.")
+
+@login_required
+def list_maintenance_equipments(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT equipmentID, Brand, Description, typeID, Availability, LastMaintenance, Price, Size 
+                FROM Equipment 
+                WHERE Availability = 1
+            """)
+            available_equipments = [
+                {
+                    'equipmentID': row[0],
+                    'Brand': row[1],
+                    'Description': row[2],
+                    'typeID': row[3],
+                    'Availability': row[4],
+                    'LastMaintenance': row[5].strftime('%Y-%m-%d') if row[5] else None,
+                    'Price': row[6],
+                    'Size': row[7]
+                } for row in cursor.fetchall()
+            ]
+    except Exception as e:
+        messages.error(request, f'Error retrieving available equipment: {e}')
+        available_equipments = []
+
+    #print(available_equipments)  # Debugging: Print to console to verify
+    
+    return render(request, 'maintenance_equipments.html', {'equipments': available_equipments})
