@@ -74,6 +74,11 @@
             <p>Manage lesson schedules and information.</p>
             <a href="/lesson-management" class="button">Lesson Management</a>
         </div>
+        <div class="column">
+            <h2>BUSINESS REPORT</h2>
+            <p>Generate Business report</p>
+            <a href="{% url 'chee_business:business_report' %}" class="button">Business Report</a>
+        </div>
         <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}
             <button type="submit" class="button">Logout</button>

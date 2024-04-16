@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Business Reports Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .report-link, .back-link {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            display: block; /* Ensures the links are block-level elements */
+            margin: 10px 0; /* Adds margin to separate the links */
+        }
+        .description {
+            padding: 10px 20px;
+        }
+        .report-row:hover {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Business Reports Dashboard</h1>
+    <table>
+        <tr>
+            <th>Reports</th>
+            <th>Description</th>
+        </tr>
+        <tr class="report-row">
+            <td><a href="{% url 'chee_business:customer_lesson_report' %}" class="report-link">View Customer Lesson Report</a></td>
+            <td class="description">Provides an overview of the lessons booked by customers, detailing the type of sport, level of difficulty, duration, and age group catered to.</td>
+        </tr>
+        <!-- Add more report rows as needed -->
+    </table>
+    <div style="text-align: center;"> <!-- Centers the back link -->
+        <a href="{% url 'home' %}" class="button">Back to Home</a>
+    </div>
+</body>
+</html>

@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'chee_rental',
     'chee_lessons',
     'chee_equipment',
+    'chee_business',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
