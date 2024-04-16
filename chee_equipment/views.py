@@ -1,3 +1,5 @@
+from django.utils import timezone
+from django.urls import reverse
 from datetime import datetime
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
@@ -205,3 +207,66 @@ def list_maintenance_equipments(request):
     #print(available_equipments)  # Debugging: Print to console to verify
     
     return render(request, 'maintenance_equipments.html', {'equipments': available_equipments})
+
+@login_required
+def list_equipment_in_maintenance(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT eq.equipmentID, eq.Brand, eq.Description, eq.TypeID, eq.LastMaintenance, eq.Price, eq.Size, em.maintenanceID
+            FROM Equipment eq
+            JOIN EquipmentMaintenance em ON eq.equipmentID = em.equipmentID
+            WHERE eq.Availability = 0
+        """)
+        maintenance_list = cursor.fetchall()
+
+    context = {
+        'maintenances': [
+            {
+                'equipmentID': eq[0],
+                'Brand': eq[1],
+                'Description': eq[2],
+                'TypeID': eq[3],
+                'LastMaintenance': eq[4].strftime('%Y-%m-%d') if eq[4] else None,
+                'Price': eq[5],
+                'Size': eq[6],
+                'maintenanceID': eq[7]
+            }
+            for eq in maintenance_list
+        ]
+    }
+
+    return render(request, 'equipment_in_maintenance_list.html', context)
+
+@login_required
+def complete_maintenance(request, maintenance_id):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        try:
+            with connection.cursor() as cursor:
+                # Update the equipment to set its availability back to 1
+                cursor.execute("""
+                    UPDATE Equipment e
+                    JOIN EquipmentMaintenance em ON e.equipmentID = em.equipmentID
+                    SET e.Availability = 1
+                    WHERE em.maintenanceID = %s
+                """, [maintenance_id])
+
+                # Then delete the maintenance record
+                cursor.execute("""
+                    DELETE FROM EquipmentMaintenance WHERE maintenanceID = %s
+                """, [maintenance_id])
+
+            messages.success(request, 'Maintenance completed and equipment is now available.')
+
+        except Exception as e:
+            messages.error(request, f'Error completing maintenance: {e}')
+        
+        return redirect(reverse('chee_equipment:list_equipment_in_maintenance'))
+    else:
+        messages.error(request, 'Invalid request method.')
+        return redirect(reverse('chee_equipment:list_equipment_in_maintenance'))
