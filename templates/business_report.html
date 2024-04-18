@@ -52,10 +52,13 @@
             <td><a href="{% url 'chee_business:customer_lesson_report' %}" class="report-link">View Customer Lesson Report</a></td>
             <td class="description">Provides an overview of the lessons booked by customers, detailing the type of sport, level of difficulty, duration, and age group catered to.</td>
         </tr>
-        <!-- Daily Income Report link -->
         <tr class="report-row">
             <td><a href="{% url 'chee_business:daily_rental_income_report' %}" class="report-link">View Daily Rental Income Report</a></td>
             <td class="description">Displays the total income generated from lessons and rentals for a given date.</td>
+        </tr>
+        <tr class="report-row">
+            <td><a href="{% url 'chee_business:daily_lesson_count_report' %}" class="report-link">View Daily Lesson Count Report</a></td>
+            <td class="description">Displays the number of lessons booked each day.</td>
         </tr>
     </table>
     <div style="text-align: center;">

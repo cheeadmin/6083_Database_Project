@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Lesson Count Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto; /* Center the table */
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .back-link {
+            display: block;
+            width: max-content;
+            padding: 10px 20px;
+            margin: 20px auto; /* Center the link */
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .no-data {
+            text-align: center;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Daily Lesson Count Report</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Date Booked by Client</th>
+                <th>Lesson Count</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% if daily_counts %}
+            {% for count in daily_counts %}
+            <tr>
+                <td>{{ count.0 }}</td>
+                <td>{{ count.1 }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="2" class="no-data">No lessons booked today.</td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+    <a href="{% url 'chee_business:business_report' %}" class="back-link">Back to Reports Dashboard</a>
+</body>
+</html>

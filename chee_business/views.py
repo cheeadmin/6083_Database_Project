@@ -45,3 +45,17 @@ def daily_rental_income_report(request):
         'income': income
     }
     return render(request, 'daily_rental_income_report.html', context)
+
+@login_required
+def daily_lesson_count_report(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT Date, LessonCount FROM DailyLessonCount ORDER BY Date DESC")
+        daily_counts = cursor.fetchall()
+
+    context = {
+        'daily_counts': daily_counts,
+    }
+    return render(request, 'daily_lesson_count_report.html', context)
