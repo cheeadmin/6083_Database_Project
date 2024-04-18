@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db import connection, DatabaseError
-from datetime import datetime
+from datetime import date
 import datetime
 
 @login_required
@@ -85,3 +85,24 @@ def daily_cancellation_report(request):
         'cancellation_counts': cancellation_counts,
     }
     return render(request, 'daily_cancellation_report.html', context)
+
+@login_required
+def monthly_rental_revenue_report(request):
+    if not request.user.is_staff:
+        messages.error(request, "Unauthorized access.")
+        return redirect('home')
+    
+    current_month = datetime.date.today().strftime('%Y-%m')
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT Month, RentalRevenue FROM MonthlyRentalRevenue WHERE Month = %s", [current_month])
+            monthly_revenue = cursor.fetchone()
+    except Exception as e:
+        messages.error(request, f"Database error: {e}")
+        monthly_revenue = None
+    
+    context = {
+        'monthly_revenue': monthly_revenue,
+        'current_month': current_month
+    }
+    return render(request, 'monthly_rental_revenue_report.html', context)

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monthly Rental Revenue Report</title>
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+    }
+    h1 {
+        text-align: center;
+    }
+    table {
+        width: 80%;
+        margin: 20px auto; /* Center the table */
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    .back-link {
+        display: block;
+        width: max-content;
+        padding: 10px 20px;
+        margin: 20px auto; /* Center the link */
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        text-align: center;
+    }
+    .no-data {
+        text-align: center;
+        font-style: italic;
+    }
+</style>
+<body>
+    <h1>Monthly Rental Revenue Report</h1>
+    <table>
+        <tr>
+            <th>Month</th>
+            <th>Rental Revenue</th>
+        </tr>
+        {% if monthly_revenue %}
+        <tr>
+            <td>{{ current_month }}</td>
+            <td>{{ monthly_revenue.1 }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="2">No revenue data available for this month.</td>
+        </tr>
+        {% endif %}
+    </table>
+    <a href="{% url 'chee_business:business_report' %}">Back to Reports Dashboard</a>
+</body>
+</html>
