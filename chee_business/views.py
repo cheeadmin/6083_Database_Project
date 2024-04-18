@@ -3,7 +3,8 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db import connection, DatabaseError
-from datetime import date
+from datetime import datetime
+import datetime
 
 @login_required
 def business_report(request):
@@ -59,3 +60,28 @@ def daily_lesson_count_report(request):
         'daily_counts': daily_counts,
     }
     return render(request, 'daily_lesson_count_report.html', context)
+
+@login_required
+def daily_cancellation_report(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    today_date = datetime.datetime.today().strftime('%Y-%m-%d')
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT cancellationDate, COUNT(*)
+                FROM LessonCancellationLog
+                WHERE cancellationDate = %s
+                GROUP BY cancellationDate
+            """, [today_date])
+            cancellation_counts = cursor.fetchall()
+    except DatabaseError as e:
+        messages.error(request, f"Database error: {e}")
+        cancellation_counts = []
+
+    context = {
+        'date': today_date,
+        'cancellation_counts': cancellation_counts,
+    }
+    return render(request, 'daily_cancellation_report.html', context)
