@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Lesson</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            width: 50%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        select,
+        input[type=submit] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        input[type=submit] {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+        }
+        input[type=submit]:hover {
+            background-color: #4cae4c;
+        }
+        .button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add Lesson</h1>
+    <form action="{% url 'add_lesson' %}" method="post">
+        {% csrf_token %}
+        Difficulty Level:
+        <select name="difficultyLevel" required>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Expert">Expert</option>
+        </select><br>
+        Duration:
+        <select name="duration" required>
+            <option value="Half Day">Half Day</option>
+            <option value="Full Day">Full Day</option>
+        </select><br>
+        Sport:
+        <select name="sport" required>
+            <option value="Ski">Ski</option>
+            <option value="Snowboard">Snowboard</option>
+        </select><br>
+        Age:
+        <select name="age" required>
+            <option value="Adult">Adult</option>
+            <option value="Kid">Kid</option>
+        </select><br>
+        <input type="submit" value="Add Lesson" class="button">
+    </form>
+    <div class="center">
+        <a href="{% url 'list_lessons' %}" class="button">Back to Lesson List</a>
+    </div>
+</body>
+</html>

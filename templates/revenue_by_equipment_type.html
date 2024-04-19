@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Revenue by Equipment Type</title>
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+    }
+    h1 {
+        text-align: center;
+    }
+    table {
+        width: 80%;
+        margin: 20px auto; /* Center the table */
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    .back-link {
+        display: block;
+        width: max-content;
+        padding: 10px 20px;
+        margin: 20px auto; /* Center the link */
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        text-align: center;
+    }
+    .no-data {
+        text-align: center;
+        font-style: italic;
+    }
+</style>
+<body>
+    <h1>Revenue by Equipment Type</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Equipment Type</th>
+                <th>Total Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for type, revenue in results %}
+            <tr>
+                <td>{{ type }}</td>
+                <td>{{ revenue }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'chee_business:business_report' %}" class="back-link">Back to Reports Dashboard</a>
+</body>
+</html>

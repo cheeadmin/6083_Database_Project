@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Members</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        a {
+            text-decoration: none;
+            color: white;
+        }
+        a.edit, a.delete {
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        a.edit {
+            background-color: #f0ad4e;
+        }
+        a.delete {
+            background-color: #d9534f;
+        }
+        .actions {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Staff Members</h1>
+    <table>
+        <tr>
+            <th>Username</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+        {% for staff in staff_members %}
+        <tr>
+            <td>{{ staff.username }}</td>
+            <td>{{ staff.firstName }} {{ staff.lastName }}</td>
+            <td>{{ staff.contactDetails }}</td>
+            <td>{{ staff.role }}</td>
+            <td class="actions">
+                {% if staff.staffID %}
+                <a href="{% url 'edit_staff' staff.staffID %}" class="button edit">Edit</a> |
+                <a href="{% url 'delete_staff' staff.staffID %}" class="button delete">Delete</a>
+                </td>
+                {% else %}
+                    Staff ID not available
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+            <tr><td colspan="5">No staff members found.</td></tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'add_staff' %}" class="button">Add New Staff Member</a>
+    <a href="{% url 'home' %}" class="button">Back to Home</a>
+</body>
+</html>

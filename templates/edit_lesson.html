@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Lesson</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            width: 50%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        select,
+        input[type=submit] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        input[type=submit] {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+        }
+        input[type=submit]:hover {
+            background-color: #4cae4c;
+        }
+        .button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edit Lesson</h1>
+    <form action="{% url 'edit_lesson' lesson.lessonID %}" method="post">
+        {% csrf_token %}
+        Difficulty Level:
+        <select name="difficultyLevel" required>
+            <option value="Beginner" {% if lesson.difficultyLevel == "Beginner" %}selected{% endif %}>Beginner</option>
+            <option value="Intermediate" {% if lesson.difficultyLevel == "Intermediate" %}selected{% endif %}>Intermediate</option>
+            <option value="Expert" {% if lesson.difficultyLevel == "Expert" %}selected{% endif %}>Expert</option>
+        </select><br>
+        Duration:
+        <select name="duration" required>
+            <option value="Half Day" {% if lesson.duration == "Half Day" %}selected{% endif %}>Half Day</option>
+            <option value="Full Day" {% if lesson.duration == "Full Day" %}selected{% endif %}>Full Day</option>
+        </select><br>
+        Sport:
+        <select name="sport" required>
+            <option value="Ski" {% if lesson.sport == "Ski" %}selected{% endif %}>Ski</option>
+            <option value="Snowboard" {% if lesson.sport == "Snowboard" %}selected{% endif %}>Snowboard</option>
+        </select><br>
+        Age:
+        <select name="age" required>
+            <option value="Adult" {% if lesson.age == "Adult" %}selected{% endif %}>Adult</option>
+            <option value="Kid" {% if lesson.age == "Kid" %}selected{% endif %}>Kid</option>
+        </select><br>
+        <input type="submit" value="Update Lesson">
+    </form>
+    <div class="center">
+        <a href="{% url 'list_lessons' %}" class="button">Back to Lesson List</a>
+    </div>
+</body>
+</html>

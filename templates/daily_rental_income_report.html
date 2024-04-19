@@ -1,0 +1,47 @@
+<!-- daily_income_report.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Income Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        .report-container {
+            width: 50%;
+            margin: 0 auto; /* Center the container */
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 50px; /* Add some space at the top */
+        }
+        .report-detail {
+            margin: 10px 0;
+        }
+        .report-value {
+            font-weight: bold;
+        }
+        .back-link {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Daily Rental Income Report</h1>
+    <div class="report-container">
+        <div class="report-detail">Date: <span class="report-value">{{ date }}</span></div>
+        <div class="report-detail">Total Income: <span class="report-value">${{ income | floatformat:2 }}</span></div>
+        <a href="{% url 'chee_business:business_report' %}" class="back-link">Back to Reports Dashboard</a>
+    </div>
+</body>
+</html>

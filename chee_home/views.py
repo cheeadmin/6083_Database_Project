@@ -1,9 +1,13 @@
+from django.db.models import ProtectedError
+from django.db.utils import IntegrityError
+from django.urls import reverse
+from django.contrib.auth.hashers import make_password
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
-from django.db import connection, IntegrityError
+from django.db import connection, IntegrityError, transaction
 from .database import get_customer_by_id
 from django.contrib.auth.decorators import login_required
 from chee_lessons.models import Staff
@@ -102,26 +106,177 @@ def register_staff(request):
 
 @login_required
 def list_staff(request):
-    staff_members = Staff.objects.select_related('user').all()
+    if not request.user.is_staff:
+        messages.error(request, "Unauthorized access.")
+        return redirect('home')
+    
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT s.staffID, s.firstName, s.lastName, s.contactDetails, s.role, u.username 
+            FROM Staff s
+            LEFT JOIN auth_user u ON s.user_id = u.id
+        """)
+        staff_members = cursor.fetchall()
+        # Convert query result to a list of dictionaries for easier access in the template
+        staff_members = [
+            {
+                'staffID': staff[0], 'firstName': staff[1], 'lastName': staff[2],
+                'contactDetails': staff[3], 'role': staff[4], 'username': staff[5]
+            } for staff in staff_members
+        ]
     return render(request, 'list_staff.html', {'staff_members': staff_members})
 
 @login_required
-def add_staff(request):
+def edit_staff(request, staff_id):
+    if not request.user.is_staff:
+        messages.error(request, "Unauthorized access.")
+        return redirect('home')
+
+    # Fetch the associated user_id for the staff member
+    user_id = None
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT user_id FROM Staff WHERE staffID = %s", [staff_id])
+        user_row = cursor.fetchone()
+        if user_row:
+            user_id = user_row[0]
+    
+    # If no matching staff member found, raise a 404 error
+    if user_id is None:
+        raise Http404('Staff member not found.')
+
+    # Fetch the existing staff details including the username
+    staff = None
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT s.staffID, s.firstName, s.lastName, s.contactDetails, s.role, u.username, u.email
+            FROM Staff s
+            JOIN auth_user u ON s.user_id = u.id
+            WHERE s.staffID = %s
+        """, [staff_id])
+        staff_row = cursor.fetchone()
+        if staff_row:
+            staff = {
+                'staffID': staff_row[0], 
+                'firstName': staff_row[1], 
+                'lastName': staff_row[2],
+                'contactDetails': staff_row[3], 
+                'role': staff_row[4],
+                'username': staff_row[5],
+                'email': staff_row[6]
+            }
+
     if request.method == 'POST':
-        # Collect form data
         username = request.POST['username']
         first_name = request.POST['first_name']
         last_name = request.POST['last_name']
+        email = request.POST['email']
         role = request.POST['role']
-        contact_details = request.POST['contact_details']
-        password = request.POST['password']
+        
+        try:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    # Update the auth_user table
+                    cursor.execute("""
+                        UPDATE auth_user SET username = %s, first_name = %s, last_name = %s, email = %s 
+                        WHERE id = %s
+                    """, [username, first_name, last_name, email, user_id])
 
-        # Create User and Staff records
-        user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name, password=password)
-        Staff.objects.create(user=user, firstName=first_name, lastName=last_name, role=role, contactDetails=contact_details)
+                    # Update the Staff table
+                    cursor.execute("""
+                        UPDATE Staff SET firstName = %s, lastName = %s, contactDetails = %s, role = %s 
+                        WHERE staffID = %s
+                    """, [first_name, last_name, email, role, staff_id])
 
-        return redirect('list_staff')
+                messages.success(request, "Staff member updated successfully.")
+                return redirect('list_staff')
+        except IntegrityError as e:
+            messages.error(request, f"An error occurred while updating: {e}")
+            return render(request, 'edit_staff.html', {'staff': staff, 'error_message': str(e)})
+    
+    return render(request, 'edit_staff.html', {'staff': staff})
 
+@login_required
+def delete_staff(request, staff_id):
+    if not request.user.is_staff:
+        messages.error(request, "Unauthorized access.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    # Nullify the instructor_id in LessonBookings if necessary
+                    cursor.execute("""
+                        UPDATE LessonBookings
+                        SET instructor_id = NULL
+                        WHERE instructor_id IN (
+                            SELECT instructorID FROM Instructors WHERE staffID = %s
+                        )
+                    """, [staff_id])
+
+                    # Delete from Instructors if necessary
+                    cursor.execute("""
+                        DELETE FROM Instructors WHERE staffID = %s
+                    """, [staff_id])
+
+                    # Delete the staff member
+                    cursor.execute("""
+                        DELETE FROM Staff WHERE staffID = %s
+                    """, [staff_id])
+
+                messages.success(request, "Staff member deleted successfully.")
+                return redirect('list_staff')
+
+        except Exception as e:
+            # If an error occurs, the transaction will be rolled back
+            messages.error(request, f"An error occurred while deleting: {e}")
+            return render(request, 'delete_staff.html', {'staff_id': staff_id})
+
+    # GET request or any other method
+    return render(request, 'delete_staff.html', {'staff_id': staff_id})
+
+@login_required
+def add_staff(request):
+    if not request.user.is_staff:
+        messages.error(request, "Unauthorized access.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        role = request.POST.get('role')
+        contact_details = request.POST.get('contact_details')
+        email = request.POST.get('email')
+        password = make_password(request.POST.get('password'))
+
+        try:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    # Create a new user in the auth_user table
+                    cursor.execute("""
+                        INSERT INTO auth_user (
+                            username, first_name, last_name, email, password,
+                            is_superuser, is_staff, is_active, date_joined
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                    """, [username, first_name, last_name, email, password,
+                          False, True, True])
+                    user_id = cursor.lastrowid
+
+                    # Create a new staff member in the Staff table
+                    cursor.execute("""
+                        INSERT INTO Staff (
+                            firstName, lastName, role, contactDetails, user_id
+                        ) VALUES (%s, %s, %s, %s, %s)
+                    """, [first_name, last_name, role, contact_details, user_id])
+
+                messages.success(request, "Staff member added successfully.")
+                return redirect(reverse('list_staff'))
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+            # No need to call rollback here; it will automatically rollback if exception occurs
+
+    # If GET request or POST with errors, render the form page
     return render(request, 'add_staff.html')
 
 @login_required

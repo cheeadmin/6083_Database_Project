@@ -22,12 +22,6 @@
         h1 {
             text-align: center;
         }
-        .column h2 {
-            margin-top: 0;
-        }
-        .column p {
-            margin-top: 0;
-        }
         .button {
             display: block;
             width: auto;
@@ -61,9 +55,14 @@
     <h1>Welcome to Chee's Staff Portal</h1>
     <div class="container">
         <div class="column">
+            <h2>EQUIPMENT MANAGEMENT</h2>
+            <p>Manage Ski and Snowboard records.</p>
+            <a href="/equipment" class="button">Equipment Management</a>
+        </div>
+        <div class="column">
             <h2>EQUIPMENT MAINTENANCE</h2>
             <p>Access equipment maintenance records.</p>
-            <a href="/equipment-maintenance" class="button">Equipment Maintenance</a>
+            <a href="/equipment/maintenance/" class="button">Equipment Maintenance</a>
         </div>
         <div class="column">
             <h2>STAFF MAINTENANCE</h2>
@@ -74,6 +73,11 @@
             <h2>LESSON MANAGEMENT</h2>
             <p>Manage lesson schedules and information.</p>
             <a href="/lesson-management" class="button">Lesson Management</a>
+        </div>
+        <div class="column">
+            <h2>BUSINESS REPORT</h2>
+            <p>Generate Business report</p>
+            <a href="{% url 'chee_business:business_report' %}" class="button">Business Report</a>
         </div>
         <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}

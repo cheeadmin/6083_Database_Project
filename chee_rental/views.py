@@ -169,46 +169,46 @@ def finalize_rental(request):
 
     user = request.user
     try:
-        customer = Customer.objects.get(user=user)
-        customer_id = customer.id
-        with connection.cursor() as cursor:
-            for equipment_id, details in cart.items():
-                cursor.execute("SELECT MAX(rentalID) FROM Rental")
-                max_rental_id = cursor.fetchone()[0]
-                next_rental_id = max_rental_id + 1 if max_rental_id is not None else 1
-                
-                # Calculate total price based on some business logic
-                total_price = details['price']  # Replace with actual calculation if needed
+        with transaction.atomic():  # Begin a transaction block
+            customer = Customer.objects.filter(user=user).first()
+            if not customer:
+                raise Customer.DoesNotExist
+            customer_id = customer.id
+            with connection.cursor() as cursor:
+                for equipment_id, details in cart.items():
+                    cursor.execute("SELECT MAX(rentalID) FROM Rental")
+                    max_rental_id = cursor.fetchone()[0]
+                    next_rental_id = max_rental_id + 1 if max_rental_id is not None else 1
+                    
+                    # Calculate total price based on some business logic
+                    total_price = details['price']  # Replace with actual calculation if needed
 
-                cursor.execute("""
-                    INSERT INTO Rental (rentalID, rentalDate, returnDate, Price, equipmentID, customerId)
-                    VALUES (%s, CURDATE(), CURDATE() + INTERVAL 1 DAY, %s, %s, %s)
-                """, [next_rental_id, total_price, equipment_id, customer_id])
-                
-                cursor.execute("""
-                    UPDATE Equipment SET Availability = 0 WHERE equipmentID = %s
-                """, [equipment_id])
+                    cursor.execute("""
+                        INSERT INTO Rental (rentalID, rentalDate, returnDate, Price, equipmentID, customerId)
+                        VALUES (%s, CURDATE(), CURDATE() + INTERVAL 1 DAY, %s, %s, %s)
+                    """, [next_rental_id, total_price, equipment_id, customer_id])
+                    
+                    cursor.execute("""
+                        UPDATE Equipment SET Availability = 0 WHERE equipmentID = %s
+                    """, [equipment_id])
 
-            connection.commit()
-
-        request.session['cart'] = {}
-        messages.success(request, "Thank you for renting with us!")
-        # Redirect to the ski list if all items in cart are skis; otherwise, redirect to snowboards
-        typeID = cart[next(iter(cart))]['typeID']
-        return redirect('list_skis' if typeID == 1 else 'list_snowboards')
+            request.session['cart'] = {}
+            messages.success(request, "Thank you for renting with us!")
+            # Redirect to the ski list if all items in cart are skis; otherwise, redirect to snowboards
+            typeID = cart[next(iter(cart))]['typeID']
+            return redirect('list_skis' if typeID == 1 else 'list_snowboards')
 
     except Customer.DoesNotExist:
         messages.error(request, "You need to be associated with a customer to rent equipment.")
         return redirect('rental_cart')
 
-
 @login_required
 def list_rented(request):
     try:
-        # Retrieve the customer object associated with the current user
-        customer = Customer.objects.get(user=request.user)
-        customer_id = customer.id
-        print(f"Customer ID: {customer_id}")  # Debug: Print the customer ID to the console
+        # Retrieve the first customer object associated with the current user
+        customer = Customer.objects.filter(user=request.user).first()
+        if not customer:
+            raise Customer.DoesNotExist
 
         rentals = []
         with connection.cursor() as cursor:
@@ -217,28 +217,25 @@ def list_rented(request):
                 FROM Rental r
                 JOIN Equipment e ON r.equipmentID = e.equipmentID
                 WHERE r.customerId = %s
-            """, [customer_id])
+            """, [customer.id])
             rentals_raw = cursor.fetchall()
-        
+
         rentals = [
             {
                 'rentalID': rental[0],
                 'brand': rental[1],
-                'description': rental[2],  # Using 'description' field as per your schema
+                'description': rental[2], 
                 'rentalDate': rental[3].strftime('%Y-%m-%d') if rental[3] else '',
                 'returnDate': rental[4].strftime('%Y-%m-%d') if rental[4] else '',
-                'price': rental[5] if rental[5] else 'N/A'  # Handle NULL prices
+                'price': rental[5] if rental[5] else 'N/A' 
             } for rental in rentals_raw
         ]
 
     except Customer.DoesNotExist:
-        print("The current user is not associated with a customer.")
+        # Handle the case where there's no customer linked to the user or any other exception that occurred
         rentals = []
-    except DatabaseError as e:
-        print(e)  # Debug: Print the error to the console
-        rentals = []
+        messages.error(request, "No customer associated with this user.")
 
-    print(rentals)  # Debug: Print the rentals list to the console
     return render(request, 'list_rented.html', {'rentals': rentals})
 
 @csrf_exempt
@@ -256,11 +253,13 @@ def return_rental(request, rental_id):
             
             # Delete the rental record
             cursor.execute("DELETE FROM Rental WHERE rentalID = %s", [rental_id])
-            
-            # Commit the changes
-            connection.commit()
         
-        return redirect('list_rented')  # Redirect to the list of rented skis
+        messages.success(request, 'Equipment returned successfully.')
+        return redirect('list_rented')  # Redirect to the list of rented items
+
+    messages.error(request, 'Invalid request method.')
+    return redirect('list_rented')
+
 
 @login_required
 def list_rented_snowboards(request):

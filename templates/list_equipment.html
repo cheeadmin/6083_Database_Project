@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Equipment List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: #d9534f;
+            color: white;
+        }
+        input[type="submit"]:hover {
+            background-color: #c9302c;
+        }
+        .add-equipment {
+            background-color: #5cb85c;
+        }
+        .add-equipment:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Equipment List</h1>
+    <table>
+        <tr>
+            <th>Brand</th>
+            <th>Description</th>
+            <th>Type ID</th>
+            <th>Availability</th>
+            <th>Last Maintenance</th>
+            <th>Price</th>
+            <th>Size</th>
+            <th>Actions</th>
+        </tr>
+        {% for equipment in equipments %}
+        <tr>
+            <td>{{ equipment.Brand }}</td>
+            <td>{{ equipment.Description }}</td>
+            <td>{{ equipment.typeID }}</td>
+            <td>{{ equipment.Availability }}</td>
+            <td>{{ equipment.LastMaintenance }}</td>
+            <td>{{ equipment.Price }}</td>
+            <td>{{ equipment.Size }}</td>
+            <td>
+                <a href="{% url 'chee_equipment:edit_equipment' equipment.equipmentID %}" class="button">Edit</a>
+                <form action="{% url 'chee_equipment:delete_equipment' equipment.equipmentID %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="submit" value="Delete" class="button">
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8">No equipment found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="center">
+        <a href="{% url 'chee_equipment:add_equipment' %}" class="button add-equipment">Add New Equipment</a>
+        <a href="{% url 'home' %}" class="button">Back to Home</a>
+    </div>
+</body>
+</html>

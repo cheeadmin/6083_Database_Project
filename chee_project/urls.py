@@ -5,5 +5,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('chee_home.urls')), 
     path('rental/', include('chee_rental.urls')),
-    path('', include('chee_lessons.urls')),  # Include chee_lessons URLs   
+    path('', include('chee_lessons.urls')), 
+    path('equipment/', include('chee_equipment.urls')), 
+    path('chee_business/', include('chee_business.urls')),
 ]

@@ -97,6 +97,10 @@
                 </form>
             </td>
         </tr>
+        {% empty %}
+            <tr>
+                <td colspan="7">No bookings found.</td>
+            </tr>
         {% endfor %}
     </table>
     <div class="center">
