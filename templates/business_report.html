@@ -73,8 +73,14 @@
                 <a href="{% url 'chee_business:rentals_by_sport_report' %}" class="report-link">View Rentals By Sport Report</a>
             </td>
             <td class="description">Displays the count of rentals for each type of sport.</td>
-        </tr>       
-            </table>
+        </tr>
+        <tr class="report-row">
+            <td>
+            <a href="{% url 'chee_business:revenue_by_equipment_type' %}" class="report-link">View Revenue by Equipment Type Report</a>
+            </td>
+            <td class="description">Display the revenue based on equipment type, ski or snowboards.</td>
+        </tr>
+    </table>
     <div style="text-align: center;">
         <a href="{% url 'home' %}" class="back-link">Back to Home</a>
     </div>

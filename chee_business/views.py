@@ -128,3 +128,10 @@ def rentals_by_sport_report(request):
         'snowboard_rentals': snowboard_rentals,
     }
     return render(request, 'rentals_by_sport_report.html', context)
+
+@login_required
+def revenue_by_equipment_type(request):
+    with connection.cursor() as cursor:
+        cursor.callproc('RevenueByEquipmentType')
+        results = cursor.fetchall()
+    return render(request, 'revenue_by_equipment_type.html', {'results': results})
