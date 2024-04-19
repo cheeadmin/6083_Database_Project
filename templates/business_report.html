@@ -68,7 +68,13 @@
             <td><a href="{% url 'chee_business:daily_cancellation_report' %}" class="report-link">View Daily Cancellation Report</a></td>
             <td class="description">Provides an overview of daily lesson cancellations.</td>
         </tr>
-    </table>
+        <tr class="report-row">
+            <td>
+                <a href="{% url 'chee_business:rentals_by_sport_report' %}" class="report-link">View Rentals By Sport Report</a>
+            </td>
+            <td class="description">Displays the count of rentals for each type of sport.</td>
+        </tr>       
+            </table>
     <div style="text-align: center;">
         <a href="{% url 'home' %}" class="back-link">Back to Home</a>
     </div>

@@ -106,3 +106,25 @@ def monthly_rental_revenue_report(request):
         'current_month': current_month
     }
     return render(request, 'monthly_rental_revenue_report.html', context)
+
+@login_required
+def rentals_by_sport_report(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    # Assuming typeID 1 is for Ski and 2 for Snowboard
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT CountRentalBySport(1)")
+            ski_rentals = cursor.fetchone()[0]
+            cursor.execute("SELECT CountRentalBySport(2)")
+            snowboard_rentals = cursor.fetchone()[0]
+    except DatabaseError as e:
+        messages.error(request, f"Database error: {e}")
+        ski_rentals = snowboard_rentals = 0
+
+    context = {
+        'ski_rentals': ski_rentals,
+        'snowboard_rentals': snowboard_rentals,
+    }
+    return render(request, 'rentals_by_sport_report.html', context)

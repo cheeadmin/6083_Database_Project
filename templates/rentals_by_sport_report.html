@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Monthly Rental Revenue Report</title>
+    <title>Rentals By Sport Report</title>
 </head>
 <style>
     body {
@@ -48,22 +48,20 @@
     }
 </style>
 <body>
-    <h1>Monthly Rental Revenue Report</h1>
+    <h1>Rentals By Sport Report</h1>
     <table>
         <tr>
-            <th>Month</th>
-            <th>Rental Revenue</th>
+            <th>Sport Type</th>
+            <th>Rental Count</th>
         </tr>
-        {% if monthly_revenue %}
         <tr>
-            <td>{{ current_month }}</td>
-            <td>{{ monthly_revenue.1 }}</td>
+            <td>Ski</td>
+            <td>{{ ski_rentals }}</td>
         </tr>
-        {% else %}
         <tr>
-            <td colspan="2">No revenue data available for this month.</td>
+            <td>Snowboard</td>
+            <td>{{ snowboard_rentals }}</td>
         </tr>
-        {% endif %}
     </table>
     <a href="{% url 'chee_business:business_report' %}" class="back-link">Back to Reports Dashboard</a>
 </body>

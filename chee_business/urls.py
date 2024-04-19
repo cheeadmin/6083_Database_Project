@@ -10,4 +10,6 @@ urlpatterns = [
     path('daily-lesson-count-report/', views.daily_lesson_count_report, name='daily_lesson_count_report'),
     path('daily-cancellation-report/', views.daily_cancellation_report, name='daily_cancellation_report'),
     path('monthly-revenue-report/', views.monthly_rental_revenue_report, name='monthly_rental_revenue_report'),
+    path('rentals-by-sport-report/', views.rentals_by_sport_report, name='rentals_by_sport_report'),
+
 ]
