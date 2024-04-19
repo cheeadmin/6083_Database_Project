@@ -13,5 +13,7 @@ urlpatterns = [
     path('rentals-by-sport-report/', views.rentals_by_sport_report, name='rentals_by_sport_report'),
     path('revenue-by-equipment-type/', views.revenue_by_equipment_type, name='revenue_by_equipment_type'),
     path('most-booked-lesson-types-report/', views.most_booked_lesson_types_report, name='most_booked_lesson_types_report'),
+    path('max-daily-rental-spend-details/', views.detailed_max_daily_rental_spend, name='detailed_max_daily_rental_spend'),
 ]
+
 

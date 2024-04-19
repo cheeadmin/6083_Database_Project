@@ -149,3 +149,33 @@ def most_booked_lesson_types_report(request):
         'report_data': result_list,
     }
     return render(request, 'most_booked_lesson_types_report.html', context)
+
+@login_required
+def detailed_max_daily_rental_spend(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    with connection.cursor() as cursor:
+        # Call the aggregate function to find the max daily spend
+        cursor.execute("SELECT GetMaxDailyRentalSpend()")
+        max_spend = cursor.fetchone()[0]
+
+        # Retrieve detailed rental records matching the max spend
+        cursor.execute("""
+            SELECT r.customerId, r.rentalDate, r.equipmentID, r.Price
+            FROM Rental r
+            INNER JOIN (
+                SELECT customerId, rentalDate, SUM(Price) AS TotalSpend
+                FROM Rental
+                GROUP BY customerId, rentalDate
+                HAVING SUM(Price) = %s
+            ) AS MaxSpendDetails ON r.customerId = MaxSpendDetails.customerId AND r.rentalDate = MaxSpendDetails.rentalDate
+            ORDER BY r.customerId, r.rentalDate
+        """, [max_spend])
+        rentals = cursor.fetchall()
+
+    context = {
+        'max_spend': max_spend,
+        'rentals': rentals
+    }
+    return render(request, 'detailed_max_daily_rental_spend.html', context)
