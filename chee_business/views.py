@@ -135,3 +135,17 @@ def revenue_by_equipment_type(request):
         cursor.callproc('RevenueByEquipmentType')
         results = cursor.fetchall()
     return render(request, 'revenue_by_equipment_type.html', {'results': results})
+
+@login_required
+def most_booked_lesson_types_report(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    
+    with connection.cursor() as cursor:
+        cursor.callproc('GetMostBookedLessonTypes')
+        result_list = cursor.fetchall()
+
+    context = {
+        'report_data': result_list,
+    }
+    return render(request, 'most_booked_lesson_types_report.html', context)
