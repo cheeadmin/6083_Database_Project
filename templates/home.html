@@ -55,6 +55,20 @@
                 flex-basis: 100%;
             }
         }
+        .image-container {
+        width: 100%; /* Adjust the width as necessary */
+        overflow: hidden; /* Ensures the image does not overflow the container */
+        display: flex;
+        justify-content: center; /* Center image horizontally */
+        align-items: center; /* Center image vertically */
+        margin-top: 20px; /* Adjust the spacing as necessary */
+        margin-bottom: 20px; /* Adjust the spacing as necessary */
+        }
+        .image-container img {
+        width: auto; /* Adjust width to content */
+        height: 100%; /* Set a fixed height or percentage as desired */
+        max-height: 600px; /* Maximum height of the image */
+        }
     </style>
 </head>
 <body>
@@ -62,17 +76,26 @@
     <div class="container">
         <div class="column">
             <h2>RENT SKI OR SNOWBOARD</h2>
-            <p>Description for rental services...</p>
+            <div class="image-container">
+                <img src="https://images.pexels.com/photos/10797264/pexels-photo-10797264.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Ski and Snowboard Image"/>
+            </div>            
+            <p>Gear up for your next adventure with our top-notch ski and snowboard rentals.</p>
             <a href="{% url 'equipment_list' %}" class="button">Go to rental</a>
         </div>
         <div class="column">
             <h2>LESSONS BOOKING</h2>
-            <p>Information on booking lessons...</p>
+            <div class="image-container">
+                <img src="https://images.pexels.com/photos/2405062/pexels-photo-2405062.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Ski and Snowboard Image"/>
+            </div>            
+            <p>Book a lesson with our certified instructors to enhance your skiing or snowboarding skills. </p>
             <a href="/lessons-booking" class="button">Book lessons</a>
         </div>
         <div class="column">
             <h2>PROFILE MANAGEMENT</h2>
-            <p>Manage your profile details here.</p>
+            <div class="image-container">
+                <img src="https://images.pexels.com/photos/20042220/pexels-photo-20042220/free-photo-of-a-dog-wearing-a-pink-jacket-sitting-on-a-snowy-mountain.jpeg" alt="Ski and Snowboard Image"/>
+            </div>            
+            <p>Keep your profile up-to-date for a more personalized experience.</p>
             <a href="{% url 'user' %}" class="button">Manage your profile</a>
         </div>
         <form action="{% url 'logout' %}" method="post">
