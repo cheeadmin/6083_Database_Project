@@ -2,9 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complete Your Profile</title>
     <style>
-        .home-link, .user-link {
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background-image: url('path-to-your-background-image.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 300px;
+            width: 100%;
+        }
+        h2 {
+            color: #0d3b66;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #3a506b;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #1b98e0;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0f7b93;
+        }
+        .link {
             display: inline-block;
             margin-top: 20px;
             padding: 10px 20px;
@@ -12,33 +67,39 @@
             color: white;
             text-decoration: none;
             border-radius: 5px;
+            margin-bottom: 10px; /* added margin-bottom for spacing */
+        }
+        .link:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <h2>Complete Your Profile</h2>
-    <form method="post" action="{% url 'create_customer_profile' %}">
-        {% csrf_token %}
-        <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" name="firstName" required><br>
-        
-        <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" name="lastName" required><br>
-        
-        <label for="contactInfo">Phone Number:</label>
-        <input type="text" id="contactInfo" name="contactInfo" required><br>
-        
-        <label for="paymentDetails">Payment Details:</label>
-        <select id="paymentDetails" name="paymentDetails" required>
-            <option value="Cash">Cash</option>
-            <option value="Credit Card">Credit Card</option>
-        </select><br>
-        
-        <button type="submit">Submit</button>
-    </form>
-    <!-- Updated User Profile Button -->
-    <a href="{% url 'user' %}" class="user-link">Back to Profile Management</a><br>
-    <!-- Existing Back to Home Button -->
-    <a href="{% url 'home' %}" class="home-link">Back to Home</a>
+    <div class="container">
+        <h2>Complete Your Profile</h2>
+        <form method="post" action="{% url 'create_customer_profile' %}">
+            {% csrf_token %}
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" required><br>
+            
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" required><br>
+            
+            <label for="contactInfo">Phone Number:</label>
+            <input type="text" id="contactInfo" name="contactInfo" required><br>
+            
+            <label for="paymentDetails">Payment Details:</label>
+            <select id="paymentDetails" name="paymentDetails" required>
+                <option value="Cash">Cash</option>
+                <option value="Credit Card">Credit Card</option>
+            </select><br>
+            
+            <button type="submit">Submit</button>
+        </form>
+        <!-- Updated User Profile Button -->
+        <a href="{% url 'user' %}" class="link">Back to Profile Management</a><br>
+        <!-- Existing Back to Home Button -->
+        <a href="{% url 'home' %}" class="link">Back to Home</a>
+    </div>
 </body>
 </html>
