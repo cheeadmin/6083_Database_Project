@@ -4,8 +4,61 @@
     <meta charset="UTF-8">
     <title>Read Profiles</title>
     <style>
-        /* Add your CSS styles here */
-        .home-link {
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background-image: url('path-to-your-background-image.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 300px;
+            width: 100%;
+        }
+        h2 {
+            color: #0d3b66;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #3a506b;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #1b98e0;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0f7b93;
+        }
+        .link {
             display: inline-block;
             margin-top: 20px;
             padding: 10px 20px;
@@ -13,26 +66,10 @@
             color: white;
             text-decoration: none;
             border-radius: 5px;
-            text-align: center;
+            margin-bottom: 10px; /* added margin-bottom for spacing */
         }
-        table {
-            width: 100%; /* Adjust table width as needed */
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .action-link {
-            background-color: #dc3545; /* Different color for delete action */
-            padding: 5px 10px;
-            border-radius: 5px;
-            color: white;
-            text-decoration: none;
+        .link:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -57,7 +94,7 @@
         
         <button type="submit">Update</button>
     </form>
-    <a href="{% url 'user' %}" class="user-link">Back to Profile Management</a><br>
-    <a href="{% url 'home' %}" class="home-link">Back to Home</a>
+    <a href="{% url 'user' %}" class="link">Back to Profile Management</a><br>
+    <a href="{% url 'home' %}" class="link">Back to Home</a>
 </body>
 </html>
