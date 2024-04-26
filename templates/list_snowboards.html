@@ -54,7 +54,6 @@
             <td>{{ snowboard.4 }}</td>
             <td class="available">Available</td>
             <td>
-                <!-- Make sure this URL matches the name in your urls.py for the add_to_cart view -->
                 <form method="post" action="{% url 'add_to_cart' snowboard.0 %}">
                     {% csrf_token %}
                     <input type="submit" value="Rent" class="button">
@@ -64,7 +63,6 @@
         {% endif %}
         {% endfor %}
     </table>
-    <!-- Display messages if any -->
     {% if messages %}
         <ul>
             {% for message in messages %}
@@ -72,9 +70,7 @@
             {% endfor %}
         </ul>
     {% endif %}
-    <!-- Add a link to view the cart -->
     <a href="{% url 'rental_cart' %}" class="button">View Cart</a>
-    <!-- Add a link to view rented items -->
     <a href="{% url 'list_rented' %}" class="button">View Rented Items</a>
     <a href="{% url 'home' %}" class="button">Back to Home</a>
 </body>
