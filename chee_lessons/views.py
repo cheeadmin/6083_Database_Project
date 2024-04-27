@@ -34,14 +34,12 @@ def book_lesson(request, lesson_id):
     if request.method == 'POST':
         booking_date = request.POST.get('booking_date')
 
-        # Get the customer_id from the Customer model
         try:
             customer = Customer.objects.get(user=request.user)
         except Customer.DoesNotExist:
             messages.error(request, "No customer profile found for this user.")
             return redirect('lessons_booking')
 
-        # Rest of your booking logic where you use customer.id
         try:
             with transaction.atomic():
                 cursor = connection.cursor()
@@ -170,7 +168,6 @@ def cancel_booking(request, booking_id):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Perform your database operations within this block
                 cursor = connection.cursor()
                 cursor.execute("DELETE FROM LessonBookings WHERE bookingID = %s", [booking_id])
             
@@ -255,7 +252,6 @@ def edit_lesson(request, lesson_id):
         sport = request.POST.get('sport')
         age = request.POST.get('age')
 
-        # Ensure that the duration and age values do not exceed their column size
         if len(duration) > 8 or len(age) > 5:
             messages.error(request, "Duration or Age values are too long.")
             return render(request, 'edit_lesson.html', {'lesson': lesson_dict})
@@ -274,7 +270,6 @@ def edit_lesson(request, lesson_id):
             messages.success(request, "Lesson updated successfully!")
         except Exception as e:
             messages.error(request, "An error occurred: " + str(e))
-            # Rollback is handled automatically by the transaction.atomic block if an exception occurs
 
         return redirect('lesson_management')
 
@@ -287,13 +282,11 @@ def delete_lesson(request, lesson_id):
 
     if request.method == 'POST':
         try:
-            # Use the atomic block to wrap the delete operation in a transaction.
             with transaction.atomic():
                 with connection.cursor() as cursor:
                     cursor.execute("DELETE FROM Lessons WHERE lessonID = %s", [lesson_id])
                 messages.success(request, 'Lesson deleted successfully!')
         except Exception as e:
-            # If there is any exception, rollback the transaction and show an error message.
             messages.error(request, f'Error deleting lesson: {e}')
         
         return redirect('list_lessons')

@@ -14,4 +14,5 @@ urlpatterns = [
     path('maintenance/equipment-in-maintenance/', views.list_equipment_in_maintenance, name='list_equipment_in_maintenance'),
     path('maintenance/complete/<int:maintenance_id>/', views.complete_maintenance, name='complete_maintenance'),
     path('equipment-in-maintenance/', views.list_equipment_in_maintenance, name='equipment_in_maintenance_list'),
+    path('equipment/maintenance/<int:maintenance_id>/edit/', views.edit_maintenance_date, name='edit_maintenance_date'),
 ]

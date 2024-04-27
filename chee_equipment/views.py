@@ -111,7 +111,6 @@ def delete_equipment(request, equipment_id):
 
     if request.method == 'POST':
         try:
-            # Use the atomic block to wrap the delete operation in a transaction.
             with transaction.atomic():
                 with connection.cursor() as cursor:
                     cursor.execute("DELETE FROM Equipment WHERE equipmentID = %s", [equipment_id])
@@ -122,7 +121,6 @@ def delete_equipment(request, equipment_id):
         
         return redirect('chee_equipment:list_equipment')
 
-    # If the request method is not POST, it's an invalid request for this action.
     return HttpResponseBadRequest("Invalid request method.")
 
 @login_required
@@ -215,7 +213,7 @@ def list_equipment_in_maintenance(request):
 
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT eq.equipmentID, eq.Brand, eq.Description, eq.TypeID, eq.LastMaintenance, eq.Price, eq.Size, em.maintenanceID
+            SELECT eq.equipmentID, eq.Brand, eq.Description, eq.TypeID, eq.LastMaintenance, eq.Price, eq.Size, em.maintenanceID, em.maintenanceDate
             FROM Equipment eq
             JOIN EquipmentMaintenance em ON eq.equipmentID = em.equipmentID
             WHERE eq.Availability = 0
@@ -232,13 +230,15 @@ def list_equipment_in_maintenance(request):
                 'LastMaintenance': eq[4].strftime('%Y-%m-%d') if eq[4] else None,
                 'Price': eq[5],
                 'Size': eq[6],
-                'maintenanceID': eq[7]
+                'maintenanceID': eq[7],
+                'MaintenanceDate': eq[8].strftime('%Y-%m-%d') if eq[8] else None,  # Add the MaintenanceDate field
             }
             for eq in maintenance_list
         ]
     }
 
     return render(request, 'equipment_in_maintenance_list.html', context)
+
 
 @login_required
 def complete_maintenance(request, maintenance_id):
@@ -270,3 +270,36 @@ def complete_maintenance(request, maintenance_id):
     else:
         messages.error(request, 'Invalid request method.')
         return redirect(reverse('chee_equipment:list_equipment_in_maintenance'))
+
+@login_required
+def edit_maintenance_date(request, maintenance_id):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    
+    # Retrieve the current maintenance record
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT maintenanceID, maintenanceDate FROM EquipmentMaintenance WHERE maintenanceID = %s", [maintenance_id])
+        maintenance = cursor.fetchone()
+        if not maintenance:
+            return HttpResponseNotFound('Maintenance record not found')
+
+    if request.method == 'POST':
+        # Process the form submission
+        new_maintenance_date = request.POST.get('new_maintenance_date')
+        # Update the maintenance record using raw SQL
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE EquipmentMaintenance
+                    SET maintenanceDate = %s
+                    WHERE maintenanceID = %s
+                """, [new_maintenance_date, maintenance_id])
+            messages.success(request, "Maintenance date updated successfully.")
+            return redirect('list_equipment_in_maintenance')
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            # Optionally, redirect to a failure page or re-render the edit form with an error message.
+            return render(request, 'edit_maintenance_date.html', {'maintenance': maintenance, 'error': str(e)})
+    else:
+        # Display the form with current data
+        return render(request, 'edit_maintenance_date.html', {'maintenance': maintenance})

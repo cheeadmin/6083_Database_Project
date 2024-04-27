@@ -274,7 +274,6 @@ def add_staff(request):
                 return redirect(reverse('list_staff'))
         except Exception as e:
             messages.error(request, f"An error occurred: {e}")
-            # No need to call rollback here; it will automatically rollback if exception occurs
 
     # If GET request or POST with errors, render the form page
     return render(request, 'add_staff.html')

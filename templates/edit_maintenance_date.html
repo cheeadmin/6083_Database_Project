@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Maintenance Date</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            width: 50%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        select,
+        input[type=submit] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        input[type=submit] {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+        }
+        input[type=submit]:hover {
+            background-color: #4cae4c;
+        }
+        .button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edit Maintenance Date</h1>
+    <form method="post" action="">
+        {% csrf_token %}
+        <label for="new_maintenance_date">Maintenance Date:</label>
+        <input type="date" id="new_maintenance_date" name="new_maintenance_date" value="{{ maintenance.1|date:'Y-m-d' }}" required>
+        <input type="submit" value="Update Maintenance Date">
+    </form>
+    <a href="{% url 'chee_equipment:equipment_in_maintenance_list' %}" class="button">View Equipment in Maintenance</a>
+        <a href="{% url 'home' %}" class="button">Back to Home</a>
+</body>
+</html>

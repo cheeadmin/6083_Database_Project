@@ -316,12 +316,9 @@ def return_snowboard_rental(request, rental_id):
 
 @login_required
 def edit_return_date(request, rental_id):
-    # Handling POST request - when the form is submitted.
     if request.method == 'POST':
-        # Extract new return date from form data
         new_return_date = request.POST.get('new_return_date')
 
-        # Start a new transaction
         try:
             with transaction.atomic():
                 with connection.cursor() as cursor:
@@ -331,17 +328,14 @@ def edit_return_date(request, rental_id):
                         SET returnDate = %s
                         WHERE rentalID = %s
                     """, [new_return_date, rental_id])
-            # If all is well, redirect to the list of rented equipments
             return redirect('list_rented')
         except Exception as e:
-            # If something went wrong, return an error message
             return render(request, 'edit_return_date.html', {
                 'error_message': 'An error occurred while updating the return date. Please try again.',
                 'rental_id': rental_id,
                 'return_date': new_return_date
             })
 
-    # Handling GET request - when the page is first loaded to show the form.
     else:
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -352,13 +346,11 @@ def edit_return_date(request, rental_id):
             row = cursor.fetchone()
 
         if row:
-            # Pass the current return date to the form
             return render(request, 'edit_return_date.html', {
                 'rental_id': rental_id,
                 'return_date': row[0]
             })
         else:
-            # Handle the error if the rental does not exist
             return render(request, 'edit_return_date.html', {
                 'error_message': 'Rental not found.',
                 'rental_id': rental_id
