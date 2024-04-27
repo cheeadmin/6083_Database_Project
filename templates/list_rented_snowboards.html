@@ -2,27 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>List of Rented Snowboards</title>
+    <title>List of Rented Equipment</title>
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-        .unavailable {
-            color: red;
-        }
-        .available {
-            color: blue;
-        }
+        /* Your styles here */
     </style>
+    <!-- Include jQuery for AJAX (if not already included) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // JavaScript function to handle form submission
+        function editReturnDate(rentalId) {
+            var newReturnDate = $('#returnDate-' + rentalId).val();
+            $.ajax({
+                url: `{% url 'edit_return_date' ${rentalId} %}`,
+                type: 'POST',
+                data: {
+                    'return_date': newReturnDate,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    alert('Return date updated successfully.');
+                    // Optionally refresh the page or part of it to show updated info
+                },
+                error: function(error) {
+                    alert('Error updating return date: ' + error.responseJSON.error);
+                }
+            });
+        }
+    </script>
 </head>
 <body>
-    <h1>Rented Snowboard Equipment List</h1>
+    <h1>Rented Equipment List</h1>
     <table>
         <tr>
             <th>Brand</th>
@@ -37,17 +46,16 @@
             <td>{{ rental.brand }}</td>
             <td>{{ rental.description }}</td>
             <td>{{ rental.rentalDate }}</td>
-            <td>{{ rental.returnDate }}</td>
+            <td>
+                <input type="date" id="returnDate-{{ rental.rentalID }}" name="returnDate" value="{{ rental.returnDate }}">
+            </td>
             <td>{{ rental.price }}</td>
             <td>
-                <form method="post" action="{% url 'return_snowboard_rental' rental.rentalID %}">
-                    {% csrf_token %}
-                    <button type="submit">Return</button>
-                </form>
+                <button type="button" onclick="editReturnDate({{ rental.rentalID }})">Update</button>
             </td>
         </tr>
         {% endfor %}
     </table>
-    <a href="{% url 'list_snowboards' %}">Back to Snowboard List</a>
+    <!-- Your other HTML here -->
 </body>
 </html>

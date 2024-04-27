@@ -19,4 +19,5 @@ urlpatterns = [
     path('return/<int:rental_id>/', return_rental, name='return_rental'),
     path('rented/snowboards/', views.list_rented_snowboards, name='list_rented_snowboards'),
     path('return/snowboard/<int:rental_id>/', views.return_snowboard_rental, name='return_snowboard_rental'),
+    path('rental/<int:rental_id>/edit-return-date/', views.edit_return_date, name='edit_return_date'),
 ]

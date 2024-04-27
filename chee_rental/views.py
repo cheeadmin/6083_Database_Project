@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -8,6 +8,8 @@ from datetime import datetime
 from django.urls import reverse
 from .models import Equipment, Customer
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 @login_required
 def equipment_list(request):
@@ -27,15 +29,12 @@ def add_to_rental_cart(request, equipment_id):
     if request.method == 'POST':
         rental_date = request.POST.get('rental_date')
         return_date = request.POST.get('return_date')
-        customer_id = request.user.customer_id  # Assuming a user is linked to a customer
+        customer_id = request.user.customer_id  
 
-        # Convert dates to datetime objects to calculate the rental period
         rental_date_obj = datetime.strptime(rental_date, '%Y-%m-%d')
         return_date_obj = datetime.strptime(return_date, '%Y-%m-%d')
         rental_period = (return_date_obj - rental_date_obj).days
         
-        # Assuming the Equipment table has a column named 'daily_price'
-        # Fetch the daily price of the equipment using raw SQL
         with connection.cursor() as cursor:
             cursor.execute("SELECT daily_price FROM mydb.Equipment WHERE equipmentID = %s", [equipment_id])
             result = cursor.fetchone()
@@ -43,25 +42,19 @@ def add_to_rental_cart(request, equipment_id):
                 daily_price = result[0]
                 total_price = rental_period * daily_price
 
-                # Generate a new rental ID or use auto increment if configured
-                # Since it is not auto-incrementing according to the given schema, you might want to calculate the next ID
                 cursor.execute("SELECT MAX(rentalID) FROM mydb.Rental")
                 max_id_result = cursor.fetchone()
                 next_rental_id = max_id_result[0] + 1 if max_id_result[0] else 1
 
-                # Insert the new rental into the database using raw SQL
                 cursor.execute("""
                     INSERT INTO mydb.Rental (rentalID, rentalDate, returnDate, Price, equipmentID, customerId)
                     VALUES (%s, %s, %s, %s, %s, %s)
                 """, [next_rental_id, rental_date, return_date, total_price, equipment_id, customer_id])
                 
-                # Commit the transaction
                 connection.commit()
 
-                # Redirect to a new URL to show the rental cart or confirmation
                 return HttpResponseRedirect('/rental-cart/')
             else:
-                # Handle the case where the equipment's daily price is not found
                 return render(request, 'error.html', {'error': 'Daily price not found for the selected equipment'})
 
 
@@ -205,7 +198,6 @@ def finalize_rental(request):
 @login_required
 def list_rented(request):
     try:
-        # Retrieve the first customer object associated with the current user
         customer = Customer.objects.filter(user=request.user).first()
         if not customer:
             raise Customer.DoesNotExist
@@ -232,7 +224,6 @@ def list_rented(request):
         ]
 
     except Customer.DoesNotExist:
-        # Handle the case where there's no customer linked to the user or any other exception that occurred
         rentals = []
         messages.error(request, "No customer associated with this user.")
 
@@ -322,3 +313,70 @@ def return_snowboard_rental(request, rental_id):
             connection.commit()
         
         return redirect('list_rented_snowboards')
+
+@login_required
+def edit_return_date(request, rental_id):
+    # Handling POST request - when the form is submitted.
+    if request.method == 'POST':
+        # Extract new return date from form data
+        new_return_date = request.POST.get('new_return_date')
+
+        # Start a new transaction
+        try:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    # Execute the SQL to update the return date
+                    cursor.execute("""
+                        UPDATE Rental
+                        SET returnDate = %s
+                        WHERE rentalID = %s
+                    """, [new_return_date, rental_id])
+            # If all is well, redirect to the list of rented equipments
+            return redirect('list_rented')
+        except Exception as e:
+            # If something went wrong, return an error message
+            return render(request, 'edit_return_date.html', {
+                'error_message': 'An error occurred while updating the return date. Please try again.',
+                'rental_id': rental_id,
+                'return_date': new_return_date
+            })
+
+    # Handling GET request - when the page is first loaded to show the form.
+    else:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT returnDate
+                FROM Rental
+                WHERE rentalID = %s
+            """, [rental_id])
+            row = cursor.fetchone()
+
+        if row:
+            # Pass the current return date to the form
+            return render(request, 'edit_return_date.html', {
+                'rental_id': rental_id,
+                'return_date': row[0]
+            })
+        else:
+            # Handle the error if the rental does not exist
+            return render(request, 'edit_return_date.html', {
+                'error_message': 'Rental not found.',
+                'rental_id': rental_id
+            })
+
+@login_required
+def update_return_date(request, rental_id):
+    if request.method == 'POST':
+        new_return_date = request.POST.get('new_return_date')
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE Rental SET returnDate = %s WHERE rentalID = %s
+            """, [new_return_date, rental_id])
+            connection.commit()
+            messages.success(request, 'Return date updated successfully.')
+            return redirect('list_rented')
+    else:
+        messages.error(request, 'An error occurred while updating the return date.')
+
+    return redirect('edit_return_date', rental_id=rental_id)

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>List of Rented Skis</title>
+    <title>List of Rented Equipment</title>
     <style>
         table {
             width: 100%;
@@ -48,12 +48,16 @@
             <td>{{ rental.brand }}</td>
             <td>{{ rental.description }}</td>
             <td>{{ rental.rentalDate }}</td>
-            <td>{{ rental.returnDate }}</td>
+            <td>
+                {{ rental.returnDate }}
+                <!-- Update button next to the return date -->
+                <a href="{% url 'edit_return_date' rental.rentalID %}" class="button">Update</a>
+            </td>
             <td>{{ rental.price }}</td>
             <td>
                 <form method="post" action="{% url 'return_rental' rental.rentalID %}">
                     {% csrf_token %}
-                    <button type="submit">Return</button>
+                    <button type="submit"class="button">Return</button>
                 </form>
             </td>
         </tr>
